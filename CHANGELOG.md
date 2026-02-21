@@ -34,3 +34,7 @@
 - 원인: BAT와 SH 생성 로직이 비대칭으로 유지됨
 - 해결방안: BAT/SH 모두 동일 정책으로 정렬(스킬 설치, 인증 저장 위치, 크론 등록, 채널 계정 바인딩, 상태 출력)
 
+### 7) SH OpenClaw 설치 단계 재발 보강
+- 버그 종류: SH에서 Node.js가 설치되어도 OpenClaw 설치/탐지가 실패해 온보딩이 중단될 수 있음
+- 원인: npm 글로벌 prefix/PATH 편차, 동일 명령 재시도 반복, 실패 시 원인 파악 정보 부족
+- 해결방안: BAT와 동일한 강건성 패턴으로 SH를 보강( node/npm 동시 검증, `~/.npm-global` PATH 정렬, `openclaw` 설치 실패 시 `npx` wrapper fallback, 실패 시 진단 정보 출력, `clawhub` 설치 PATH 통일 )
