@@ -5103,7 +5103,7 @@ echo.
 ${cliOAuthBatStep}
 :: [${2 + s}/${totalStepsBat}] Install new skills (via clawhub)
 echo [${2 + s}/${totalStepsBat}] Installing new skills...
-wsl bash -lc "npm install -g clawhub@latest 2>/dev/null || true"
+wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g clawhub@latest >/dev/null 2>&1 || true"
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
@@ -5195,6 +5195,16 @@ if errorlevel 1 (
         )
     )
 )
+wsl bash -lc "command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1" >nul 2>&1
+if errorlevel 1 (
+    echo.
+    echo [ERROR] Node.js/npm not available in non-interactive WSL shell.
+    echo This usually means PATH/profile was not loaded correctly.
+    echo Run this manually in WSL:
+    echo   source ~/.profile ^&^& node -v ^&^& npm -v
+    goto :end
+)
+wsl bash -lc "node -v && npm -v"
 echo   Node.js: OK
 echo.
 
@@ -5216,8 +5226,15 @@ if errorlevel 1 (
 )
 wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
+    echo   [WARN] Global install still missing. Creating npx fallback wrapper...
+    wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; mkdir -p ~/.npm-global/bin && (echo '#!/usr/bin/env bash'; echo 'npx --yes openclaw@latest \"\$@\"') > ~/.npm-global/bin/openclaw && chmod +x ~/.npm-global/bin/openclaw"
+)
+wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
+if errorlevel 1 (
     echo.
     echo [ERROR] OpenClaw installation failed.
+    echo Diagnostic info:
+    wsl bash -lc "node -v 2>/dev/null || echo node:missing; npm -v 2>/dev/null || echo npm:missing; npm config get prefix 2>/dev/null || true; command -v openclaw 2>/dev/null || echo openclaw:missing"
     echo Try this manually in WSL, then re-run setup:
     echo   npm config set prefix ~/.npm-global
     echo   echo 'export PATH=$HOME/.npm-global/bin:$PATH' ^>^> ~/.profile
@@ -5270,7 +5287,7 @@ echo.
 :: [${6 + stepOffset}/${totalStepsBat}] Install skills (global via clawhub)
 echo [${6 + stepOffset}/${totalStepsBat}] Installing skills...
 echo   Installing clawhub CLI...
-wsl bash -lc "npm install -g clawhub@latest 2>/dev/null || true"
+wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g clawhub@latest >/dev/null 2>&1 || true"
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
