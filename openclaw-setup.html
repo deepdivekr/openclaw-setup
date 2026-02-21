@@ -5088,7 +5088,10 @@ if errorlevel 1 (
     goto :end
 )
 echo   WSL2: OK
-wsl bash -lc "command -v openclaw" >nul 2>&1
+wsl bash -lc "mkdir -p ~/.npm-global && npm config set prefix ~/.npm-global >/dev/null 2>&1 || true"
+wsl bash -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.profile"
+wsl bash -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.bashrc"
+wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo.
     echo   [ERROR] OpenClaw is not installed.
@@ -5197,24 +5200,32 @@ echo.
 
 :: [2/${totalStepsBat}] OpenClaw install
 echo [2/${totalStepsBat}] Checking OpenClaw...
-wsl bash -lc "command -v openclaw" >nul 2>&1
+wsl bash -lc "mkdir -p ~/.npm-global"
+wsl bash -lc "npm config set prefix ~/.npm-global >/dev/null 2>&1 || true"
+wsl bash -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.profile"
+wsl bash -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.bashrc"
+wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo   Installing OpenClaw...
-    wsl bash -lc "npm install -g openclaw@latest" 2>nul
+    wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g openclaw@latest"
     if errorlevel 1 (
-        echo   [WARN] First attempt failed. Retrying...
+        echo   [WARN] First attempt failed. Retrying with sudo...
         timeout /t 3 >nul
-        wsl bash -lc "npm install -g openclaw@latest" 2>nul
+        wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; sudo npm install -g openclaw@latest"
     )
 )
-wsl bash -lc "command -v openclaw" >nul 2>&1
+wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo.
     echo [ERROR] OpenClaw installation failed.
-    echo Run this manually in WSL, then re-run this setup:
-    echo   npm install -g openclaw@latest
+    echo Try this manually in WSL, then re-run setup:
+    echo   npm config set prefix ~/.npm-global
+    echo   echo 'export PATH=$HOME/.npm-global/bin:$PATH' ^>^> ~/.profile
+    echo   source ~/.profile
+    echo   npm install -g openclaw@latest ^|^| sudo npm install -g openclaw@latest
     goto :end
 )
+wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; openclaw --version || true"
 echo   OpenClaw: ready
 echo.
 
@@ -5796,6 +5807,11 @@ read -p "Press Enter to close..." || true
 `
 # ─── [1/${totalStepsSh}] Verify OpenClaw is installed ──────
 echo "[1/${totalStepsSh}] Verifying environment..."
+mkdir -p "$HOME/.npm-global"
+npm config set prefix "$HOME/.npm-global" >/dev/null 2>&1 || true
+grep -qs 'npm-global/bin' "$HOME/.profile" || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> "$HOME/.profile"
+grep -qs 'npm-global/bin' "$HOME/.bashrc" || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> "$HOME/.bashrc"
+export PATH="$HOME/.npm-global/bin:$PATH"
 if ! command -v openclaw &> /dev/null; then
     error_exit "OpenClaw is not installed. Please run the full setup script first."
 fi
@@ -5920,17 +5936,27 @@ echo ""
 
 # ─── [2/${totalStepsSh}] Install OpenClaw ──────────────────
 echo "[2/${totalStepsSh}] Checking OpenClaw..."
+mkdir -p "$HOME/.npm-global"
+npm config set prefix "$HOME/.npm-global" >/dev/null 2>&1 || true
+grep -qs 'npm-global/bin' "$HOME/.profile" || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> "$HOME/.profile"
+grep -qs 'npm-global/bin' "$HOME/.bashrc" || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> "$HOME/.bashrc"
+export PATH="$HOME/.npm-global/bin:$PATH"
+hash -r
 if ! command -v openclaw &> /dev/null; then
     echo "  Installing OpenClaw..."
-    npm install -g openclaw@latest 2>/dev/null || {
+    npm install -g openclaw@latest || {
         echo "  [WARN] First attempt failed. Retrying..."
         sleep 3
-        npm install -g openclaw@latest 2>/dev/null || sudo npm install -g openclaw@latest 2>/dev/null || error_exit "OpenClaw installation failed.\\nRun this manually: npm install -g openclaw@latest"
+        npm install -g openclaw@latest || sudo npm install -g openclaw@latest || error_exit "OpenClaw installation failed.\\nRun this manually:\\n  npm config set prefix ~/.npm-global\\n  echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.profile\\n  source ~/.profile\\n  npm install -g openclaw@latest || sudo npm install -g openclaw@latest"
     }
     echo "  OpenClaw: installed"
 else
     echo "  OpenClaw: already installed"
 fi
+if ! command -v openclaw &> /dev/null; then
+    error_exit "OpenClaw command is still not in PATH after install."
+fi
+echo "  OpenClaw version: $(openclaw --version 2>/dev/null || echo unknown)"
 echo "  [OK]"
 echo ""
 
