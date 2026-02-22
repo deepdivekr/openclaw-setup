@@ -2434,55 +2434,8 @@
         await transitionToAgent();
       }
 
-      function _isValidAgentName(v) {
-        return !/\s/.test(v) && (/^[a-z0-9][a-z0-9-]{0,18}[a-z0-9]$|^[a-z0-9]{2}$/.test(v));
-      }
-
-      async function _askOpenClawNameAtPhase2Start() {
-        const existingName = String(State.get('agent.name') || '').trim();
-
-        Renderer.showTypingIndicator();
-        await sleep(450);
-        await Renderer.addBotMessage(
-          'Phase 2를 시작하기 전에 먼저 OpenClaw 이름을 정할게요.',
-          { speed: 25 }
-        );
-
-        if (existingName) {
-          const keepOrNew = await Renderer.showInput('buttons', {
-            choices: [
-              { label: `기존 이름 사용 (${existingName})`, value: 'keep' },
-              { label: '새 이름으로 변경', value: 'new' },
-            ],
-          });
-
-          if (keepOrNew.value === 'keep') {
-            State.set('agent.name', existingName);
-            return existingName;
-          }
-        }
-
-        Renderer.showTypingIndicator();
-        await sleep(350);
-        await Renderer.addBotMessage(
-          'OpenClaw 이름을 입력해주세요.\n소문자, 숫자, 하이픈만 사용 가능해요 (2~20자).\n예: my-bot, zoe-ai, helper-1',
-          { speed: 25 }
-        );
-
-        const agentName = await Renderer.showInput('text', {
-          placeholder: 'OpenClaw 이름 (예: zoe-ai)',
-          validate: _isValidAgentName,
-        });
-
-        State.set('agent.name', agentName);
-
-        Renderer.showTypingIndicator();
-        await sleep(300);
-        await Renderer.addBotMessage(`${agentName}로 설정했어요. 이제 계속 진행할게요.`, { speed: 25 });
-        return agentName;
-      }
-
       async function transitionToAgent() {
+        const agentName = State.get('agent.name');
         const provider  = State.get('model.provider');
 
         // API 키 검증 성공 확인 메시지 (Ollama/skipAITest는 불필요)
@@ -2493,19 +2446,17 @@
           await Renderer.addBotMessage('API 키가 확인되었습니다! ✅', { speed: 25 });
         }
 
-        const agentName = await _askOpenClawNameAtPhase2Start();
-
         Renderer.showTypingIndicator();
         await sleep(500);
         await Renderer.addBotMessage(
-          '???? OpenClaw? ?? ??????.\n??? ??????.',
+          `지금부터 🦞 ${agentName}가 직접 대화합니다.\n잠시만요, ${agentName}를 깨우는 중...`,
           { speed: 25 }
         );
 
         State.set('phase', 'transition');
 
         // Phase 전환 애니메이션
-        await Renderer.phaseTransition('??', 'OpenClaw');
+        await Renderer.phaseTransition('🦞', agentName);
 
         State.set('phase', 'agent');
 
@@ -2879,11 +2830,30 @@
       /* ── Step 2: 에이전트 이름 ──────────────── */
       async function step2() {
         State.set('currentStep', 2);
+        const userName = State.get('user.name');
+
+        // 2-1. 에이전트 이름 (유효성 검사)
+        Renderer.showTypingIndicator();
+        await sleep(600);
+        await Renderer.addBotMessage(
+          `${userName}님의 AI 에이전트 이름을 정해봐요!\n영소문자, 숫자, 하이픈만 사용할 수 있어요 (2~20자).\n예: my-bot, zoe-ai, helper-1`,
+          { speed: 25 }
+        );
+
+        // validate가 실패하면 Renderer가 Promise를 pending 유지 → 사용자가 올바른 값 입력 시 resolve
+        const agentName = await Renderer.showInput('text', {
+          placeholder: '에이전트 이름 (예: zoe-ai, 공백/특수문자 불가)',
+          validate:    (v) => !/\s/.test(v) && (/^[a-z0-9][a-z0-9-]{0,18}[a-z0-9]$|^[a-z0-9]{2}$/.test(v)),
+          allowBack: true,
+        });
+        if (agentName && typeof agentName === 'object' && agentName.value === '__back__') return '__back__';
+
+        State.set('agent.name', agentName);
 
         Renderer.showTypingIndicator();
-        await sleep(450);
+        await sleep(500);
         await Renderer.addBotMessage(
-          'OpenClaw ??? Phase 2 ???? ????. ?? ??/?? ??? ?????.',
+          `${agentName}, 멋진 이름이에요! 🦞\nAI 모델을 먼저 선택한 다음, ${agentName}의 성격을 정해볼게요.`,
           { speed: 25 }
         );
       }
@@ -6334,7 +6304,7 @@ read -p "Press Enter to close..." || true
           savedAt:      new Date().toISOString(),
           setupStatus:  snap.setupStatus || 'existing',
           user:         snap.user,
-          agent:         (() => { const { name, ...rest } = (snap.agent || {}); return rest; })(),
+          agent:        snap.agent,
           channel:      snap.channel,
           model: {
             provider:   snap.model.provider,
