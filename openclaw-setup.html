@@ -4710,7 +4710,7 @@ OpenClaw 스킬 보안 스캐너. 스킬 설치 전 악성 패턴을 자동 탐�
             `type nul > "!${tempVar}!"`,
             ...chunks.map((chunk) => `>> "!${tempVar}!" echo ${chunk}`),
             // Windows echo writes CRLF; strip '\r' before decoding in Linux base64.
-            `wsl bash -lc "tr -d '\\r' | base64 -d ${redirect} ${targetPath}" < "!${tempVar}!"`,
+            `wsl bash --noprofile --norc -lc "tr -d '\\r' | base64 -d ${redirect} ${targetPath}" < "!${tempVar}!"`,
             `if errorlevel 1 echo   [WARN] Failed to decode/write ${targetPath}`,
             `del /f /q "!${tempVar}!" >nul 2>&1`,
           ];
@@ -4783,7 +4783,7 @@ OpenClaw 스킬 보안 스캐너. 스킬 설치 전 악성 패턴을 자동 탐�
           ? (() => {
               const loginUrl = Config.PROVIDERS[snap.model?.provider]?.cliOAuth?.loginUrl || '';
               const openBrowser = loginUrl ? `start "" "${loginUrl}"` : ':: No login URL configured';
-              return `\n:: [${cliOAuthBatStepNum}/${totalStepsBat}] CLI OAuth authentication\necho [${cliOAuthBatStepNum}/${totalStepsBat}] Setting up CLI OAuth authentication...\necho.\necho   A browser window will open for authentication.\necho   After login, return to this terminal.\necho.\n${openBrowser}\nwsl bash -lc "${cliOAuthCommandProfiled}"\nif errorlevel 1 (\n    echo.\n    echo   [!] CLI authentication was not completed.\n    echo   Run this manually later:\n    echo     wsl bash -lc "${cliOAuthCommandProfiled}"\n    echo.\n    set /p "CONTINUE_OAUTH=Continue setup anyway? (Y/n): "\n    if /i "!CONTINUE_OAUTH!"=="n" goto :end\n)\necho   [OK] CLI OAuth configured\necho.\n`;
+              return `\n:: [${cliOAuthBatStepNum}/${totalStepsBat}] CLI OAuth authentication\necho [${cliOAuthBatStepNum}/${totalStepsBat}] Setting up CLI OAuth authentication...\necho.\necho   A browser window will open for authentication.\necho   After login, return to this terminal.\necho.\n${openBrowser}\nwsl bash --noprofile --norc -lc "${cliOAuthCommandProfiled}"\nif errorlevel 1 (\n    echo.\n    echo   [!] CLI authentication was not completed.\n    echo   Run this manually later:\n    echo     wsl bash --noprofile --norc -lc "${cliOAuthCommandProfiled}"\n    echo.\n    set /p "CONTINUE_OAUTH=Continue setup anyway? (Y/n): "\n    if /i "!CONTINUE_OAUTH!"=="n" goto :end\n)\necho   [OK] CLI OAuth configured\necho.\n`;
             })()
           : '';
         // cli-oauth 추가 시 이후 단계 번호 오프셋
@@ -4794,14 +4794,14 @@ OpenClaw 스킬 보안 스캐너. 스킬 설치 전 악성 패턴을 자동 탐�
         const skillInstalls = deltaSkillIds.length
           ? deltaSkillIds.map((id) =>
               `echo   Installing ${_escapeBatVar(id)}...\n` +
-              `wsl bash -lc "clawhub install '${_escapeShVar(id)}' --dir ~/.openclaw/skills 2>/dev/null || npx clawhub@latest install '${_escapeShVar(id)}' --dir ~/.openclaw/skills 2>/dev/null" || echo   [WARN] ${_escapeBatVar(id)} install failed`
+              `wsl bash --noprofile --norc -lc "clawhub install '${_escapeShVar(id)}' --dir ~/.openclaw/skills 2>/dev/null || npx clawhub@latest install '${_escapeShVar(id)}' --dir ~/.openclaw/skills 2>/dev/null" || echo   [WARN] ${_escapeBatVar(id)} install failed`
             ).join('\n')
           : 'echo   No new skills to install';
 
         // 활성 스킬을 openclaw.json skills.entries에 등록 (enabled=true)
         const skillEnableConfigs = activeSkillIds.length
           ? activeSkillIds.map((id) =>
-              `wsl bash -lc "openclaw config set 'skills.entries.${_escapeShVar(id)}.enabled' true" 2>nul || true`
+              `wsl bash --noprofile --norc -lc "openclaw config set 'skills.entries.${_escapeShVar(id)}.enabled' true" 2>nul || true`
             ).join('\n')
           : ':: No skills to enable';
 
@@ -4817,7 +4817,7 @@ OpenClaw 스킬 보안 스캐너. 스킬 설치 전 악성 패턴을 자동 탐�
               const authUrl = skill && skill.keyUrl ? `start "" "${skill.keyUrl}"` : '';
               return `echo   ${_escapeBatVar(id)}: OAuth authenticating...\n` +
                 (authUrl ? `${authUrl}\n` : '') +
-                `wsl bash -lc "${_ocBat(`auth '${_escapeShVar(id)}'`)}" 2>nul || echo   [WARN] ${_escapeBatVar(id)} auth skipped`;
+                `wsl bash --noprofile --norc -lc "${_ocBat(`auth '${_escapeShVar(id)}'`)}" 2>nul || echo   [WARN] ${_escapeBatVar(id)} auth skipped`;
             }).join('\n')
           : 'echo   No OAuth required';
 
@@ -4840,7 +4840,7 @@ OpenClaw 스킬 보안 스캐너. 스킬 설치 전 악성 패턴을 자동 탐�
               return `echo   ${_escapeBatContent(skill.name)} ^(${_escapeBatContent(skill.authType)}^) - key required\n` +
                 `${keyUrl}\n` +
                 `echo.\n` +
-                `wsl bash -lc "read -r -p '  Enter ${_escapeShVar(skill.name)} key: ' TMPKEY && if [ -n \\"\\$TMPKEY\\" ]; then openclaw config set 'skills.entries.${_escapeShVar(id)}.apiKey' \\"\\$TMPKEY\\" 2>/dev/null && echo '  [OK] ${_escapeShVar(id)} key saved'; else echo '  [SKIP] No key entered'; fi"`;
+                `wsl bash --noprofile --norc -lc "read -r -p '  Enter ${_escapeShVar(skill.name)} key: ' TMPKEY && if [ -n \\"\\$TMPKEY\\" ]; then openclaw config set 'skills.entries.${_escapeShVar(id)}.apiKey' \\"\\$TMPKEY\\" 2>/dev/null && echo '  [OK] ${_escapeShVar(id)} key saved'; else echo '  [SKIP] No key entered'; fi"`;
             }).join('\n')
           : '';
 
@@ -4848,7 +4848,7 @@ OpenClaw 스킬 보안 스캐너. 스킬 설치 전 악성 패턴을 자동 탐�
         const cronSteps = deltaCronEntries.length
           ? deltaCronEntries.map((c) =>
               `echo   ${_escapeBatVar(c.name || c.id)}: ${_escapeBatVar(c.cron || '')}\n` +
-              `wsl bash -lc "${_ocBat(`cron add --name '${_escapeShVar(c.id)}' --cron '${_escapeShVar(c.cron || '')}' --session isolated --message 'Run ${_escapeShVar(c.name || c.id)}' --tz '%TIMEZONE%'`)}" 2>nul || echo   [WARN] ${_escapeBatVar(c.id)} failed - run manually: openclaw cron add --name "${_escapeBatVar(c.id)}" --cron "${_escapeBatVar(c.cron || '')}" --session isolated --message "Run ${_escapeBatVar(c.name || c.id)}" --tz "%TIMEZONE%"`
+              `wsl bash --noprofile --norc -lc "${_ocBat(`cron add --name '${_escapeShVar(c.id)}' --cron '${_escapeShVar(c.cron || '')}' --session isolated --message 'Run ${_escapeShVar(c.name || c.id)}' --tz '%TIMEZONE%'`)}" 2>nul || echo   [WARN] ${_escapeBatVar(c.id)} failed - run manually: openclaw cron add --name "${_escapeBatVar(c.id)}" --cron "${_escapeBatVar(c.cron || '')}" --session isolated --message "Run ${_escapeBatVar(c.name || c.id)}" --tz "%TIMEZONE%"`
             ).join('\n')
           : 'echo   No new schedules to add';
 
@@ -4856,14 +4856,14 @@ OpenClaw 스킬 보안 스캐너. 스킬 설치 전 악성 패턴을 자동 탐�
         const providerEnvKey = snap.model.provider.toUpperCase() + '_API_KEY';
         const channelType = String(snap.channel.type || '').toLowerCase();
         const _batEnvUpsert = (key, value) =>
-          `wsl bash -lc "(grep -v '^${_escapeShVar(key)}=' %OPENCLAW_HOME%/.env 2>/dev/null || true) > %OPENCLAW_HOME%/.env.tmp && mv %OPENCLAW_HOME%/.env.tmp %OPENCLAW_HOME%/.env && printf '%s=%s\\n' '${_escapeShVar(key)}' '${_escapeBatContent(_escapeShVar(value))}' >> %OPENCLAW_HOME%/.env"`;
+          `wsl bash --noprofile --norc -lc "(grep -v '^${_escapeShVar(key)}=' %OPENCLAW_HOME%/.env 2>/dev/null || true) > %OPENCLAW_HOME%/.env.tmp && mv %OPENCLAW_HOME%/.env.tmp %OPENCLAW_HOME%/.env && echo '${_escapeShVar(key)}=${_escapeBatContent(_escapeShVar(value))}' >> %OPENCLAW_HOME%/.env"`;
         const providerEnvLine = snap.model.apiKey
           ? _batEnvUpsert(providerEnvKey, snap.model.apiKey || '')
           : ':: No provider API key';
 
         // 에이전트 등록 + 채널 설정 bat 블록 (신규/isUpdate 공용)
         const batAgentRegister = `echo   Registering agent %AGENT_NAME%...
-wsl bash -lc "openclaw agents add '%AGENT_NAME%' --workspace %OPENCLAW_HOME%/agents/%AGENT_NAME%" 2>nul
+wsl bash --noprofile --norc -lc "openclaw agents add '%AGENT_NAME%' --workspace %OPENCLAW_HOME%/agents/%AGENT_NAME%" 2>nul
 if errorlevel 1 (
     echo   [INFO] Agent may already be registered, continuing...
 )
@@ -4922,15 +4922,15 @@ echo   [OK] Agent registered`;
           ].join('\n');
           const b64 = _toBase64Utf8(pyScript);
           const channelAddCmd = snap.channel.token
-            ? `wsl bash -lc "openclaw channels add --channel '%CHANNEL_TYPE%' --account '%AGENT_NAME%' --token '${_escapeBatContent(_escapeShVar(snap.channel.token))}'" 2>nul`
-            : `wsl bash -lc "openclaw channels add --channel '%CHANNEL_TYPE%' --account '%AGENT_NAME%'" 2>nul`;
+            ? `wsl bash --noprofile --norc -lc "openclaw channels add --channel '%CHANNEL_TYPE%' --account '%AGENT_NAME%' --token '${_escapeBatContent(_escapeShVar(snap.channel.token))}'" 2>nul`
+            : `wsl bash --noprofile --norc -lc "openclaw channels add --channel '%CHANNEL_TYPE%' --account '%AGENT_NAME%'" 2>nul`;
           return `set "CHANNEL_CONFIG_WARN=0"
 echo   Enabling %CHANNEL_TYPE% plugin...
-wsl bash -lc "openclaw plugins enable %CHANNEL_TYPE%" 2>nul || (echo   [INFO] Plugin enable command skipped ^(continuing with config patch^) & set "CHANNEL_CONFIG_WARN=1")
+wsl bash --noprofile --norc -lc "openclaw plugins enable %CHANNEL_TYPE%" 2>nul || (echo   [INFO] Plugin enable command skipped ^(continuing with config patch^) & set "CHANNEL_CONFIG_WARN=1")
 echo   Adding %CHANNEL_TYPE% channel via CLI...
 ${channelAddCmd} || (echo   [INFO] CLI channel add skipped ^(trying config patch^) & set "CHANNEL_CONFIG_WARN=1")
 echo   Configuring %CHANNEL_TYPE% channel/account/binding in openclaw.json...
-wsl bash -lc "echo ${b64} | base64 -d | python3" 2>nul || (echo   [WARN] Channel config step skipped & set "CHANNEL_CONFIG_WARN=1")`;
+wsl bash --noprofile --norc -lc "echo ${b64} | base64 -d | python3" 2>nul || (echo   [WARN] Channel config step skipped & set "CHANNEL_CONFIG_WARN=1")`;
         })();
 
         // Telegram pairing 안내 (bat) — gateway 후 출력
@@ -4941,27 +4941,27 @@ wsl bash -lc "echo ${b64} | base64 -d | python3" 2>nul || (echo   [WARN] Channel
     echo  Telegram Pairing:
     echo  1. Open Telegram and send /start to your bot
     echo  2. In another terminal run:
-    echo     wsl bash -lc "openclaw pairing list telegram"
+    echo     wsl bash --noprofile --norc -lc "openclaw pairing list telegram"
     echo  3. Approve the code:
-    echo     wsl bash -lc "openclaw pairing approve telegram CODE"
+    echo     wsl bash --noprofile --norc -lc "openclaw pairing approve telegram CODE"
     echo ============================================
 )`
           : '';
 
         // 런타임이 참조하는 agent 디렉터리로 프롬프트 파일 동기화
         const batSyncAgentPromptFiles = `echo   Syncing prompt files to agent dir...
-wsl bash -lc "mkdir -p %OPENCLAW_HOME%/agents/%AGENT_NAME%/agent"
-wsl bash -lc "cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/MEMORY.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/agent/MEMORY.md 2>/dev/null || true"
-wsl bash -lc "cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/agent/SOUL.md 2>/dev/null || true"
-wsl bash -lc "cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/IDENTITY.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/agent/IDENTITY.md 2>/dev/null || true"
+wsl bash --noprofile --norc -lc "mkdir -p %OPENCLAW_HOME%/agents/%AGENT_NAME%/agent"
+wsl bash --noprofile --norc -lc "cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/MEMORY.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/agent/MEMORY.md 2>/dev/null || true"
+wsl bash --noprofile --norc -lc "cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/agent/SOUL.md 2>/dev/null || true"
+wsl bash --noprofile --norc -lc "cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/IDENTITY.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/agent/IDENTITY.md 2>/dev/null || true"
 echo   [OK] Prompt files synced`;
 
         // deltaSkillTokens: 스킬 API 키를 openclaw.json skills.entries에 저장
         const skillTokenLines = deltaSkillTokens.length
           ? deltaSkillTokens
               .map((s) =>
-                `wsl bash -lc "openclaw config set 'skills.entries.${_escapeShVar(s.id)}.enabled' true" 2>nul\n` +
-                `wsl bash -lc "openclaw config set 'skills.entries.${_escapeShVar(s.id)}.apiKey' '${_escapeBatContent(_escapeShVar(s.key))}'" 2>nul || echo   [WARN] ${_escapeBatVar(s.id)} key save failed`
+                `wsl bash --noprofile --norc -lc "openclaw config set 'skills.entries.${_escapeShVar(s.id)}.enabled' true" 2>nul\n` +
+                `wsl bash --noprofile --norc -lc "openclaw config set 'skills.entries.${_escapeShVar(s.id)}.apiKey' '${_escapeBatContent(_escapeShVar(s.key))}'" 2>nul || echo   [WARN] ${_escapeBatVar(s.id)} key save failed`
               ).join('\n')
           : ':: No new skill keys';
 
@@ -5036,23 +5036,23 @@ echo Restarting OpenClaw gateway...
 echo.
 set "_GATEWAY_OK="
 echo   Trying: openclaw gateway restart
-wsl bash -lc "${_ocBat('gateway restart')}"
+wsl bash --noprofile --norc -lc "${_ocBat('gateway restart')}"
 if not errorlevel 1 (
     set "_GATEWAY_OK=1"
     echo   [OK] Gateway restarted. New agent config loaded ^(multi-agent mode^).
 )
 if not defined _GATEWAY_OK (
 echo   Trying: openclaw gateway
-wsl bash -lc "${_ocBat('gateway')}"
+wsl bash --noprofile --norc -lc "${_ocBat('gateway')}"
 if not errorlevel 1 set "_GATEWAY_OK=1"
 )
 if not defined _GATEWAY_OK (
     echo.
     echo   [!] Gateway start failed.
     echo   Try manually:
-    echo     wsl bash -lc "openclaw gateway restart"
-    echo     wsl bash -lc "openclaw gateway"
-    echo     wsl bash -lc "openclaw gateway install"
+    echo     wsl bash --noprofile --norc -lc "openclaw gateway restart"
+    echo     wsl bash --noprofile --norc -lc "openclaw gateway"
+    echo     wsl bash --noprofile --norc -lc "openclaw gateway install"
     echo.
     echo   Common causes:
     echo   - API key is invalid
@@ -5078,13 +5078,13 @@ if /i not "!DELETE_SCRIPT!"=="n" (
 
           const updateWorkspaceBlock = `:: [${3 + s}/${totalStepsBat}] Update config files + register agent + configure channel
 echo [${3 + s}/${totalStepsBat}] Updating agent config...
-wsl bash -lc "mkdir -p %OPENCLAW_HOME%/agents/%AGENT_NAME%"
-wsl bash -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json.bak; echo '  [INFO] Backed up config.json -> config.json.bak'; fi"
+wsl bash --noprofile --norc -lc "mkdir -p %OPENCLAW_HOME%/agents/%AGENT_NAME%"
+wsl bash --noprofile --norc -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json.bak; echo '  [INFO] Backed up config.json -> config.json.bak'; fi"
 ${writeConfigJsonBat}
 :: MEMORY.md: append delta (기존 내용 유지)
 ${writeMemoryMdBat}
 ${securityChanged ? `:: SOUL.md: security level changed (${_escapeBatVar(String(baseline.security || ''))} -> ${safeSecurity})
-wsl bash -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md.bak; echo '  [INFO] Backed up SOUL.md -> SOUL.md.bak'; fi"
+wsl bash --noprofile --norc -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md.bak; echo '  [INFO] Backed up SOUL.md -> SOUL.md.bak'; fi"
 ${writeSoulMdBat}` : `:: SOUL.md: security level unchanged, skipping`}
 ${writeIdentityMdBat}
 echo   [OK] Config updated
@@ -5120,9 +5120,9 @@ if errorlevel 1 (
 echo   WSL2: OK
 wsl bash --noprofile --norc -lc "for f in ~/.profile ~/.bashrc; do [ -f $f ] || continue; sed -i '/^export PATH=.*\\.npm-global\\/bin:.*Program Files.*$/d' $f 2>/dev/null || true; done"
 wsl bash --noprofile --norc -lc "mkdir -p ~/.npm-global && npm config set prefix ~/.npm-global >/dev/null 2>&1 || true"
-wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.profile"
-wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.bashrc"
-wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.profile"
+wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.bashrc"
+wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo.
     echo   [ERROR] OpenClaw is not installed.
@@ -5134,7 +5134,7 @@ echo.
 ${cliOAuthBatStep}
 :: [${2 + s}/${totalStepsBat}] Install new skills (via clawhub)
 echo [${2 + s}/${totalStepsBat}] Installing new skills...
-wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; npm install -g clawhub@latest >/dev/null 2>&1 || true"
+wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g clawhub@latest >/dev/null 2>&1 || true"
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
@@ -5210,11 +5210,11 @@ wsl bash --noprofile --norc -lc "for f in ~/.profile ~/.bashrc; do [ -f $f ] || 
 wsl bash --noprofile --norc -lc "command -v node" >nul 2>&1
 if errorlevel 1 (
     echo   Node.js not found in WSL. Installing via nvm...
-    wsl bash -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash && export NVM_DIR=$HOME/.nvm && [ -s $NVM_DIR/nvm.sh ] && . $NVM_DIR/nvm.sh && nvm install 22"
+    wsl bash --noprofile --norc -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash && export NVM_DIR=$HOME/.nvm && [ -s $NVM_DIR/nvm.sh ] && . $NVM_DIR/nvm.sh && nvm install 22"
     if errorlevel 1 (
         echo   [WARN] First attempt failed. Retrying...
         timeout /t 3 >nul
-        wsl bash -c "export NVM_DIR=$HOME/.nvm && [ -s $NVM_DIR/nvm.sh ] && . $NVM_DIR/nvm.sh && nvm install 22"
+        wsl bash --noprofile --norc -c "export NVM_DIR=$HOME/.nvm && [ -s $NVM_DIR/nvm.sh ] && . $NVM_DIR/nvm.sh && nvm install 22"
         if errorlevel 1 (
             echo.
             echo [ERROR] Node.js installation failed.
@@ -5244,23 +5244,23 @@ echo.
 echo [2/${totalStepsBat}] Checking OpenClaw...
 wsl bash --noprofile --norc -lc "mkdir -p ~/.npm-global"
 wsl bash --noprofile --norc -lc "npm config set prefix ~/.npm-global >/dev/null 2>&1 || true"
-wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.profile"
-wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.bashrc"
-wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.profile"
+wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.bashrc"
+wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo   Installing OpenClaw...
-    wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; npm install -g openclaw@latest"
+    wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g openclaw@latest"
     if errorlevel 1 (
         echo   [WARN] First attempt failed. Retrying with sudo...
         timeout /t 3 >nul
-        wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; sudo npm install -g openclaw@latest"
+        wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; sudo npm install -g openclaw@latest"
     )
 )
-wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo   [WARN] Global install still missing after npm install.
 )
-wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo.
     echo [ERROR] OpenClaw installation failed.
@@ -5268,22 +5268,22 @@ if errorlevel 1 (
     wsl bash --noprofile --norc -lc "node -v 2>/dev/null || echo node:missing; npm -v 2>/dev/null || echo npm:missing; npm config get prefix 2>/dev/null || true; command -v openclaw 2>/dev/null || echo openclaw:missing"
     echo Try this manually in WSL, then re-run setup:
     echo   npm config set prefix ~/.npm-global
-    echo   echo 'export PATH="$HOME/.npm-global/bin:$PATH"' ^>^> ~/.profile
+    echo   echo 'export PATH=$HOME/.npm-global/bin:$PATH' ^>^> ~/.profile
     echo   source ~/.profile
     echo   npm install -g openclaw@latest ^|^| sudo npm install -g openclaw@latest
     goto :end
 )
-wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; openclaw --version || true"
+wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; openclaw --version || true"
 echo   OpenClaw: ready
 echo.
 
 :: [3/${totalStepsBat}] Create agent workspace
 echo [3/${totalStepsBat}] Creating agent workspace...
-wsl bash -lc "mkdir -p %OPENCLAW_HOME%/agents/%AGENT_NAME%"
-wsl bash -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/MEMORY.md ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/MEMORY.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/MEMORY.md.bak; echo '  [INFO] Backed up MEMORY.md -> MEMORY.md.bak'; fi"
-wsl bash -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md.bak; echo '  [INFO] Backed up SOUL.md -> SOUL.md.bak'; fi"
-wsl bash -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/IDENTITY.md ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/IDENTITY.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/IDENTITY.md.bak; echo '  [INFO] Backed up IDENTITY.md -> IDENTITY.md.bak'; fi"
-wsl bash -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json.bak; echo '  [INFO] Backed up config.json -> config.json.bak'; fi"
+wsl bash --noprofile --norc -lc "mkdir -p %OPENCLAW_HOME%/agents/%AGENT_NAME%"
+wsl bash --noprofile --norc -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/MEMORY.md ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/MEMORY.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/MEMORY.md.bak; echo '  [INFO] Backed up MEMORY.md -> MEMORY.md.bak'; fi"
+wsl bash --noprofile --norc -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/SOUL.md.bak; echo '  [INFO] Backed up SOUL.md -> SOUL.md.bak'; fi"
+wsl bash --noprofile --norc -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/IDENTITY.md ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/IDENTITY.md %OPENCLAW_HOME%/agents/%AGENT_NAME%/IDENTITY.md.bak; echo '  [INFO] Backed up IDENTITY.md -> IDENTITY.md.bak'; fi"
+wsl bash --noprofile --norc -lc "if [ -f %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json ]; then cp %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json %OPENCLAW_HOME%/agents/%AGENT_NAME%/config.json.bak; echo '  [INFO] Backed up config.json -> config.json.bak'; fi"
 
 ${writeMemoryMdBat}
 
@@ -5300,25 +5300,25 @@ echo.
 
 :: [4/${totalStepsBat}] Save API keys (global .env)
 echo [4/${totalStepsBat}] Setting API keys...
-wsl bash -lc "mkdir -p %OPENCLAW_HOME%"
-wsl bash -lc "if [ -f %OPENCLAW_HOME%/.env ]; then cp %OPENCLAW_HOME%/.env %OPENCLAW_HOME%/.env.bak; echo '  [INFO] Backed up .env -> .env.bak'; fi"
-wsl bash -lc "touch %OPENCLAW_HOME%/.env && chmod 600 %OPENCLAW_HOME%/.env"
+wsl bash --noprofile --norc -lc "mkdir -p %OPENCLAW_HOME%"
+wsl bash --noprofile --norc -lc "if [ -f %OPENCLAW_HOME%/.env ]; then cp %OPENCLAW_HOME%/.env %OPENCLAW_HOME%/.env.bak; echo '  [INFO] Backed up .env -> .env.bak'; fi"
+wsl bash --noprofile --norc -lc "touch %OPENCLAW_HOME%/.env && chmod 600 %OPENCLAW_HOME%/.env"
 ${providerEnvLine}
 echo   [OK] Keys saved
 echo.
 ${cliOAuthBatStep}
 :: [${5 + stepOffset}/${totalStepsBat}] Install security scanner (global)
 echo [${5 + stepOffset}/${totalStepsBat}] Installing skill security scanner...
-wsl bash -lc "mkdir -p %OPENCLAW_HOME%/skills/skill-scanner"
+wsl bash --noprofile --norc -lc "mkdir -p %OPENCLAW_HOME%/skills/skill-scanner"
 ${writeScannerMdBat}
-wsl bash -c "echo 'Security level: %SECURITY_LEVEL%' >> %OPENCLAW_HOME%/skills/skill-scanner/SKILL.md"
+wsl bash --noprofile --norc -c "echo 'Security level: %SECURITY_LEVEL%' >> %OPENCLAW_HOME%/skills/skill-scanner/SKILL.md"
 echo   Skill scanner installed.
 echo.
 
 :: [${6 + stepOffset}/${totalStepsBat}] Install skills (global via clawhub)
 echo [${6 + stepOffset}/${totalStepsBat}] Installing skills...
 echo   Installing clawhub CLI...
-wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; npm install -g clawhub@latest >/dev/null 2>&1 || true"
+wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g clawhub@latest >/dev/null 2>&1 || true"
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
@@ -5355,13 +5355,13 @@ set "_MODELS_SET_STYLE=single"
 set "_APPLY_DEFAULT_MODELS="
 if /i "!CHANGE_MODELS!"=="y" (
     echo.
-    wsl bash -lc "openclaw models --help 2>/dev/null | grep -Eq '^[[:space:]]+config([[:space:]]|$)'" >nul 2>&1
+    wsl bash --noprofile --norc -lc "openclaw models --help 2>/dev/null | grep -Eq '^[[:space:]]+config([[:space:]]|$)'" >nul 2>&1
     if not errorlevel 1 set "_MODELS_CONFIG_AVAILABLE=1"
-    wsl bash -lc "openclaw models set --help 2>/dev/null | grep -q -- '--easy'" >nul 2>&1
+    wsl bash --noprofile --norc -lc "openclaw models set --help 2>/dev/null | grep -q -- '--easy'" >nul 2>&1
     if not errorlevel 1 set "_MODELS_SET_STYLE=multi"
     if defined _MODELS_CONFIG_AVAILABLE (
         echo   Opening model configuration...
-        wsl bash -lic "openclaw models --agent '%AGENT_NAME%' config || openclaw models config || openclaw models"
+        wsl bash --noprofile --norc -lc "openclaw models --agent '%AGENT_NAME%' config || openclaw models config || openclaw models"
         if not errorlevel 1 set "_MODELS_UPDATED=1"
     ) else (
         echo   [INFO] Interactive model config is not available in this OpenClaw version.
@@ -5380,19 +5380,19 @@ if /i "!CHANGE_MODELS!"=="y" (
 )
 if defined _APPLY_DEFAULT_MODELS (
     if /i "!_MODELS_SET_STYLE!"=="multi" (
-        wsl bash -lc "openclaw models --agent '%AGENT_NAME%' set --easy '%MODEL_EASY%' --medium '%MODEL_MEDIUM%' --hard '%MODEL_HARD%' || openclaw models set --agent '%AGENT_NAME%' --easy '%MODEL_EASY%' --medium '%MODEL_MEDIUM%' --hard '%MODEL_HARD%' || openclaw models set --easy '%MODEL_EASY%' --medium '%MODEL_MEDIUM%' --hard '%MODEL_HARD%'"
+        wsl bash --noprofile --norc -lc "openclaw models --agent '%AGENT_NAME%' set --easy '%MODEL_EASY%' --medium '%MODEL_MEDIUM%' --hard '%MODEL_HARD%' || openclaw models set --agent '%AGENT_NAME%' --easy '%MODEL_EASY%' --medium '%MODEL_MEDIUM%' --hard '%MODEL_HARD%' || openclaw models set --easy '%MODEL_EASY%' --medium '%MODEL_MEDIUM%' --hard '%MODEL_HARD%'"
         if not errorlevel 1 set "_MODELS_UPDATED=1"
         if errorlevel 1 (
             echo   [WARN] Full model IDs failed. Retrying without provider prefix...
-            wsl bash -lc "openclaw models --agent '%AGENT_NAME%' set --easy '%MODEL_EASY_BARE%' --medium '%MODEL_MEDIUM_BARE%' --hard '%MODEL_HARD_BARE%' || openclaw models set --agent '%AGENT_NAME%' --easy '%MODEL_EASY_BARE%' --medium '%MODEL_MEDIUM_BARE%' --hard '%MODEL_HARD_BARE%' || openclaw models set --easy '%MODEL_EASY_BARE%' --medium '%MODEL_MEDIUM_BARE%' --hard '%MODEL_HARD_BARE%'"
+            wsl bash --noprofile --norc -lc "openclaw models --agent '%AGENT_NAME%' set --easy '%MODEL_EASY_BARE%' --medium '%MODEL_MEDIUM_BARE%' --hard '%MODEL_HARD_BARE%' || openclaw models set --agent '%AGENT_NAME%' --easy '%MODEL_EASY_BARE%' --medium '%MODEL_MEDIUM_BARE%' --hard '%MODEL_HARD_BARE%' || openclaw models set --easy '%MODEL_EASY_BARE%' --medium '%MODEL_MEDIUM_BARE%' --hard '%MODEL_HARD_BARE%'"
             if not errorlevel 1 set "_MODELS_UPDATED=1"
         )
     ) else (
-        wsl bash -lc "openclaw models --agent '%AGENT_NAME%' set '%MODEL_MEDIUM%' || openclaw models set --agent '%AGENT_NAME%' '%MODEL_MEDIUM%' || openclaw models set '%MODEL_MEDIUM%' || openclaw models --agent '%AGENT_NAME%' set --model '%MODEL_MEDIUM%' || openclaw models set --model '%MODEL_MEDIUM%'"
+        wsl bash --noprofile --norc -lc "openclaw models --agent '%AGENT_NAME%' set '%MODEL_MEDIUM%' || openclaw models set --agent '%AGENT_NAME%' '%MODEL_MEDIUM%' || openclaw models set '%MODEL_MEDIUM%' || openclaw models --agent '%AGENT_NAME%' set --model '%MODEL_MEDIUM%' || openclaw models set --model '%MODEL_MEDIUM%'"
         if not errorlevel 1 set "_MODELS_UPDATED=1"
         if errorlevel 1 (
             echo   [WARN] Model set with provider prefix failed. Retrying with bare ID...
-            wsl bash -lc "openclaw models --agent '%AGENT_NAME%' set '%MODEL_MEDIUM_BARE%' || openclaw models set --agent '%AGENT_NAME%' '%MODEL_MEDIUM_BARE%' || openclaw models set '%MODEL_MEDIUM_BARE%' || openclaw models --agent '%AGENT_NAME%' set --model '%MODEL_MEDIUM_BARE%' || openclaw models set --model '%MODEL_MEDIUM_BARE%'"
+            wsl bash --noprofile --norc -lc "openclaw models --agent '%AGENT_NAME%' set '%MODEL_MEDIUM_BARE%' || openclaw models set --agent '%AGENT_NAME%' '%MODEL_MEDIUM_BARE%' || openclaw models set '%MODEL_MEDIUM_BARE%' || openclaw models --agent '%AGENT_NAME%' set --model '%MODEL_MEDIUM_BARE%' || openclaw models set --model '%MODEL_MEDIUM_BARE%'"
             if not errorlevel 1 set "_MODELS_UPDATED=1"
         )
     )
@@ -5404,7 +5404,7 @@ if defined _MODELS_UPDATED (
     if defined _APPLY_DEFAULT_MODELS (
         echo   [WARN] Models were not updated automatically.
         echo   [INFO] Check available model commands:
-        echo     wsl bash -lc "openclaw models --help"
+        echo     wsl bash --noprofile --norc -lc "openclaw models --help"
     ) else (
         echo   [INFO] Models unchanged.
     )
@@ -5440,23 +5440,23 @@ echo %AGENT_NAME% message delivery depends on gateway health and bot pairing ^(/
 echo.
 set "_GATEWAY_OK="
 echo   Trying: openclaw gateway restart
-wsl bash -lc "${_ocBat('gateway restart')}"
+wsl bash --noprofile --norc -lc "${_ocBat('gateway restart')}"
 if not errorlevel 1 (
     set "_GATEWAY_OK=1"
     echo   [OK] Gateway restarted. New agent config loaded ^(multi-agent mode^).
 )
 if not defined _GATEWAY_OK (
 echo   Trying: openclaw gateway
-wsl bash -lc "${_ocBat('gateway')}"
+wsl bash --noprofile --norc -lc "${_ocBat('gateway')}"
 if not errorlevel 1 set "_GATEWAY_OK=1"
 )
 if not defined _GATEWAY_OK (
     echo.
     echo   [!] Gateway start failed.
     echo   Try manually:
-    echo     wsl bash -lc "openclaw gateway restart"
-    echo     wsl bash -lc "openclaw gateway"
-    echo     wsl bash -lc "openclaw gateway install"
+    echo     wsl bash --noprofile --norc -lc "openclaw gateway restart"
+    echo     wsl bash --noprofile --norc -lc "openclaw gateway"
+    echo     wsl bash --noprofile --norc -lc "openclaw gateway install"
     echo.
     echo   Common causes:
     echo   - API key is invalid
@@ -6029,7 +6029,7 @@ if ! command -v openclaw &> /dev/null; then
     npm -v 2>/dev/null || echo "  npm:missing"
     npm config get prefix 2>/dev/null || true
     command -v openclaw 2>/dev/null || echo "  openclaw:missing"
-    error_exit "OpenClaw installation failed.\\nRun this manually:\\n  npm config set prefix ~/.npm-global\\n  echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.profile\\n  source ~/.profile\\n  npm install -g openclaw@latest || sudo npm install -g openclaw@latest"
+    error_exit "OpenClaw installation failed.\\nRun this manually:\\n  npm config set prefix ~/.npm-global\\n  printf '%s\n' 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.profile\\n  source ~/.profile\\n  npm install -g openclaw@latest || sudo npm install -g openclaw@latest"
 fi
 echo "  OpenClaw version: $(openclaw --version 2>/dev/null || echo unknown)"
 echo "  [OK]"
