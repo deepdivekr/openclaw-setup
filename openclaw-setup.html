@@ -5088,10 +5088,11 @@ if errorlevel 1 (
     goto :end
 )
 echo   WSL2: OK
-wsl bash -lc "mkdir -p ~/.npm-global && npm config set prefix ~/.npm-global >/dev/null 2>&1 || true"
-wsl bash -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.profile"
-wsl bash -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.bashrc"
-wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "for f in ~/.profile ~/.bashrc; do [ -f $f ] || continue; sed -i '/^export PATH=.*\\.npm-global\\/bin:.*Program Files.*$/d' $f 2>/dev/null || true; done"
+wsl bash --noprofile --norc -lc "mkdir -p ~/.npm-global && npm config set prefix ~/.npm-global >/dev/null 2>&1 || true"
+wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.profile"
+wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.bashrc"
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo.
     echo   [ERROR] OpenClaw is not installed.
@@ -5103,7 +5104,7 @@ echo.
 ${cliOAuthBatStep}
 :: [${2 + s}/${totalStepsBat}] Install new skills (via clawhub)
 echo [${2 + s}/${totalStepsBat}] Installing new skills...
-wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g clawhub@latest >/dev/null 2>&1 || true"
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; npm install -g clawhub@latest >/dev/null 2>&1 || true"
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
@@ -5173,9 +5174,10 @@ if errorlevel 1 (
 )
 
 echo   WSL2: OK
+wsl bash --noprofile --norc -lc "for f in ~/.profile ~/.bashrc; do [ -f $f ] || continue; sed -i '/^export PATH=.*\\.npm-global\\/bin:.*Program Files.*$/d' $f 2>/dev/null || true; done"
 
 :: Check Node.js in WSL
-wsl bash -lc "command -v node" >nul 2>&1
+wsl bash --noprofile --norc -lc "command -v node" >nul 2>&1
 if errorlevel 1 (
     echo   Node.js not found in WSL. Installing via nvm...
     wsl bash -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash && export NVM_DIR=$HOME/.nvm && [ -s $NVM_DIR/nvm.sh ] && . $NVM_DIR/nvm.sh && nvm install 22"
@@ -5195,7 +5197,7 @@ if errorlevel 1 (
         )
     )
 )
-wsl bash -lc "command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1" >nul 2>&1
+wsl bash --noprofile --norc -lc "command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1" >nul 2>&1
 if errorlevel 1 (
     echo.
     echo [ERROR] Node.js/npm not available in non-interactive WSL shell.
@@ -5204,45 +5206,44 @@ if errorlevel 1 (
     echo   source ~/.profile ^&^& node -v ^&^& npm -v
     goto :end
 )
-wsl bash -lc "node -v && npm -v"
+wsl bash --noprofile --norc -lc "node -v && npm -v"
 echo   Node.js: OK
 echo.
 
 :: [2/${totalStepsBat}] OpenClaw install
 echo [2/${totalStepsBat}] Checking OpenClaw...
-wsl bash -lc "mkdir -p ~/.npm-global"
-wsl bash -lc "npm config set prefix ~/.npm-global >/dev/null 2>&1 || true"
-wsl bash -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.profile"
-wsl bash -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.bashrc"
-wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "mkdir -p ~/.npm-global"
+wsl bash --noprofile --norc -lc "npm config set prefix ~/.npm-global >/dev/null 2>&1 || true"
+wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.profile"
+wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.bashrc"
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo   Installing OpenClaw...
-    wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g openclaw@latest"
+    wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; npm install -g openclaw@latest"
     if errorlevel 1 (
         echo   [WARN] First attempt failed. Retrying with sudo...
         timeout /t 3 >nul
-        wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; sudo npm install -g openclaw@latest"
+        wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; sudo npm install -g openclaw@latest"
     )
 )
-wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
-    echo   [WARN] Global install still missing. Creating npx fallback wrapper...
-    wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; mkdir -p ~/.npm-global/bin && (echo '#!/usr/bin/env bash'; echo 'npx --yes openclaw@latest \"\$@\"') > ~/.npm-global/bin/openclaw && chmod +x ~/.npm-global/bin/openclaw"
+    echo   [WARN] Global install still missing after npm install.
 )
-wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo.
     echo [ERROR] OpenClaw installation failed.
     echo Diagnostic info:
-    wsl bash -lc "node -v 2>/dev/null || echo node:missing; npm -v 2>/dev/null || echo npm:missing; npm config get prefix 2>/dev/null || true; command -v openclaw 2>/dev/null || echo openclaw:missing"
+    wsl bash --noprofile --norc -lc "node -v 2>/dev/null || echo node:missing; npm -v 2>/dev/null || echo npm:missing; npm config get prefix 2>/dev/null || true; command -v openclaw 2>/dev/null || echo openclaw:missing"
     echo Try this manually in WSL, then re-run setup:
     echo   npm config set prefix ~/.npm-global
-    echo   echo 'export PATH=$HOME/.npm-global/bin:$PATH' ^>^> ~/.profile
+    echo   echo 'export PATH="$HOME/.npm-global/bin:$PATH"' ^>^> ~/.profile
     echo   source ~/.profile
     echo   npm install -g openclaw@latest ^|^| sudo npm install -g openclaw@latest
     goto :end
 )
-wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; openclaw --version || true"
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; openclaw --version || true"
 echo   OpenClaw: ready
 echo.
 
@@ -5287,7 +5288,7 @@ echo.
 :: [${6 + stepOffset}/${totalStepsBat}] Install skills (global via clawhub)
 echo [${6 + stepOffset}/${totalStepsBat}] Installing skills...
 echo   Installing clawhub CLI...
-wsl bash -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g clawhub@latest >/dev/null 2>&1 || true"
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; npm install -g clawhub@latest >/dev/null 2>&1 || true"
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
@@ -5824,10 +5825,14 @@ read -p "Press Enter to close..." || true
 `
 # ─── [1/${totalStepsSh}] Verify OpenClaw is installed ──────
 echo "[1/${totalStepsSh}] Verifying environment..."
+for f in "$HOME/.profile" "$HOME/.bashrc"; do
+    [ -f "$f" ] || continue
+    sed -i '/^export PATH=.*\.npm-global\/bin:.*Program Files.*$/d' "$f" 2>/dev/null || true
+done
 mkdir -p "$HOME/.npm-global"
 npm config set prefix "$HOME/.npm-global" >/dev/null 2>&1 || true
-grep -qs 'npm-global/bin' "$HOME/.profile" || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> "$HOME/.profile"
-grep -qs 'npm-global/bin' "$HOME/.bashrc" || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> "$HOME/.bashrc"
+grep -qs 'npm-global/bin' "$HOME/.profile" || echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> "$HOME/.profile"
+grep -qs 'npm-global/bin' "$HOME/.bashrc" || echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> "$HOME/.bashrc"
 export PATH="$HOME/.npm-global/bin:$PATH"
 if ! command -v openclaw &> /dev/null; then
     error_exit "OpenClaw is not installed. Please run the full setup script first."
@@ -5933,6 +5938,12 @@ if [[ "$OSTYPE" == darwin* ]]; then
     fi
 fi
 
+# Repair broken PATH lines from older setup runs (unquoted Program Files paths)
+for f in "$HOME/.profile" "$HOME/.bashrc"; do
+    [ -f "$f" ] || continue
+    sed -i '/^export PATH=.*\.npm-global\/bin:.*Program Files.*$/d' "$f" 2>/dev/null || true
+done
+
 # Node.js 확인
 if ! command -v node &> /dev/null; then
     echo "  Node.js not found. Installing via nvm..."
@@ -5960,8 +5971,8 @@ echo ""
 echo "[2/${totalStepsSh}] Checking OpenClaw..."
 mkdir -p "$HOME/.npm-global"
 npm config set prefix "$HOME/.npm-global" >/dev/null 2>&1 || true
-grep -qs 'npm-global/bin' "$HOME/.profile" || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> "$HOME/.profile"
-grep -qs 'npm-global/bin' "$HOME/.bashrc" || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> "$HOME/.bashrc"
+grep -qs 'npm-global/bin' "$HOME/.profile" || echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> "$HOME/.profile"
+grep -qs 'npm-global/bin' "$HOME/.bashrc" || echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> "$HOME/.bashrc"
 export PATH="$HOME/.npm-global/bin:$PATH"
 hash -r
 if ! command -v openclaw &> /dev/null; then
@@ -5988,7 +5999,7 @@ if ! command -v openclaw &> /dev/null; then
     npm -v 2>/dev/null || echo "  npm:missing"
     npm config get prefix 2>/dev/null || true
     command -v openclaw 2>/dev/null || echo "  openclaw:missing"
-    error_exit "OpenClaw installation failed.\\nRun this manually:\\n  npm config set prefix ~/.npm-global\\n  echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.profile\\n  source ~/.profile\\n  npm install -g openclaw@latest || sudo npm install -g openclaw@latest"
+    error_exit "OpenClaw installation failed.\\nRun this manually:\\n  npm config set prefix ~/.npm-global\\n  echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.profile\\n  source ~/.profile\\n  npm install -g openclaw@latest || sudo npm install -g openclaw@latest"
 fi
 echo "  OpenClaw version: $(openclaw --version 2>/dev/null || echo unknown)"
 echo "  [OK]"

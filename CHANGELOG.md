@@ -38,3 +38,8 @@
 - 버그 종류: SH에서 Node.js가 설치되어도 OpenClaw 설치/탐지가 실패해 온보딩이 중단될 수 있음
 - 원인: npm 글로벌 prefix/PATH 편차, 동일 명령 재시도 반복, 실패 시 원인 파악 정보 부족
 - 해결방안: BAT와 동일한 강건성 패턴으로 SH를 보강( node/npm 동시 검증, `~/.npm-global` PATH 정렬, `openclaw` 설치 실패 시 `npx` wrapper fallback, 실패 시 진단 정보 출력, `clawhub` 설치 PATH 통일 )
+
+### 8) WSL PATH 구문 오류로 OpenClaw 설치 실패 (2026-02-22)
+- 버그 종류: `OpenClaw installation failed` 전에 `/home/.../.profile: syntax error near unexpected token '('`가 반복 발생
+- 원인: `export PATH=$HOME/.npm-global/bin:$PATH`를 따옴표 없이 실행/저장하면서, Windows 경로(`Program Files (x86)`)가 포함된 PATH가 Bash 구문 오류를 유발
+- 해결방안: BAT/SH 모두 PATH 처리 로직을 수정해 `export PATH="$HOME/.npm-global/bin:$PATH"`로 통일하고, 실행 전 `.profile`/`.bashrc`의 깨진 PATH 라인을 자동 정리하도록 보강
