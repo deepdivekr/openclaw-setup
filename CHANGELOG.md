@@ -50,3 +50,8 @@
 - 버그 종류: `[2/11] Checking OpenClaw...` 구간에서 `unexpected EOF while looking for matching \`''`가 발생하거나 명령 문자열이 중간에서 손상됨
 - 원인: BAT에서 `%s`를 포함한 `printf '%s...'` 패턴이 환경변수 확장 규칙과 충돌해 명령 본문이 변형됨
 - 해결방안: BAT 생성 로직의 `%` 포함 포맷 문자열을 제거하고, PATH/.env 쓰기를 `%` 없는 `echo` 기반 명령으로 교체해 인용부호 안정성을 확보
+
+### 10) BAT 런타임 PATH export 미인용으로 인한 `Program Files (x86)` 파싱 오류
+- 버그 종류: OpenClaw 설치 명령에서 `syntax error near unexpected token '('`가 반복되어 설치 실패
+- 원인: `export PATH=$HOME/.npm-global/bin:$PATH; ...` 실행 시, 확장된 PATH에 포함된 공백/괄호 경로가 명령 파싱을 깨뜨리는 케이스가 발생
+- 해결방안: BAT 생성 명령의 런타임 PATH export를 `export PATH=\"$HOME/.npm-global/bin:$PATH\"; ...` 형태로 강제 인용하여 파싱 오류를 차단

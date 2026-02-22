@@ -26,6 +26,7 @@ Telegram에 AI 비서가 인사를 보냅니다.
 
 - 모든 WSL 실행 명령을 `wsl bash --noprofile --norc`로 통일해, 사용자 `.profile` 문법 오류가 설치 플로우를 깨지 않도록 수정
 - BAT 내부 `printf '%s...'` 패턴을 제거해 `%` 확장으로 명령이 변형되는 문제를 차단
+- OpenClaw 설치 단계의 런타임 PATH export를 인용 처리해 `Program Files (x86)` 포함 환경에서 발생하던 `syntax error near unexpected token '('`를 차단
 - OpenClaw 설치/탐지 단계의 PATH 처리 및 수동 복구 안내 문구를 안정적인 형태로 정리
 
 ### 2026-02-21

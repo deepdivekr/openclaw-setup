@@ -5122,7 +5122,7 @@ wsl bash --noprofile --norc -lc "for f in ~/.profile ~/.bashrc; do [ -f $f ] || 
 wsl bash --noprofile --norc -lc "mkdir -p ~/.npm-global && npm config set prefix ~/.npm-global >/dev/null 2>&1 || true"
 wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.profile"
 wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.bashrc"
-wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo.
     echo   [ERROR] OpenClaw is not installed.
@@ -5134,7 +5134,7 @@ echo.
 ${cliOAuthBatStep}
 :: [${2 + s}/${totalStepsBat}] Install new skills (via clawhub)
 echo [${2 + s}/${totalStepsBat}] Installing new skills...
-wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g clawhub@latest >/dev/null 2>&1 || true"
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; npm install -g clawhub@latest >/dev/null 2>&1 || true"
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
@@ -5246,21 +5246,21 @@ wsl bash --noprofile --norc -lc "mkdir -p ~/.npm-global"
 wsl bash --noprofile --norc -lc "npm config set prefix ~/.npm-global >/dev/null 2>&1 || true"
 wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.profile || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.profile"
 wsl bash --noprofile --norc -lc "grep -qs 'npm-global/bin' ~/.bashrc || echo 'export PATH=$HOME/.npm-global/bin:$PATH' >> ~/.bashrc"
-wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo   Installing OpenClaw...
-    wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g openclaw@latest"
+    wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; npm install -g openclaw@latest"
     if errorlevel 1 (
         echo   [WARN] First attempt failed. Retrying with sudo...
         timeout /t 3 >nul
-        wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; sudo npm install -g openclaw@latest"
+        wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; sudo npm install -g openclaw@latest"
     )
 )
-wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo   [WARN] Global install still missing after npm install.
 )
-wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; command -v openclaw" >nul 2>&1
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; command -v openclaw" >nul 2>&1
 if errorlevel 1 (
     echo.
     echo [ERROR] OpenClaw installation failed.
@@ -5273,7 +5273,7 @@ if errorlevel 1 (
     echo   npm install -g openclaw@latest ^|^| sudo npm install -g openclaw@latest
     goto :end
 )
-wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; openclaw --version || true"
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; openclaw --version || true"
 echo   OpenClaw: ready
 echo.
 
@@ -5318,7 +5318,7 @@ echo.
 :: [${6 + stepOffset}/${totalStepsBat}] Install skills (global via clawhub)
 echo [${6 + stepOffset}/${totalStepsBat}] Installing skills...
 echo   Installing clawhub CLI...
-wsl bash --noprofile --norc -lc "export PATH=$HOME/.npm-global/bin:$PATH; npm install -g clawhub@latest >/dev/null 2>&1 || true"
+wsl bash --noprofile --norc -lc "export PATH=\"$HOME/.npm-global/bin:$PATH\"; npm install -g clawhub@latest >/dev/null 2>&1 || true"
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
