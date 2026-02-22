@@ -39,7 +39,14 @@
 - 원인: npm 글로벌 prefix/PATH 편차, 동일 명령 재시도 반복, 실패 시 원인 파악 정보 부족
 - 해결방안: BAT와 동일한 강건성 패턴으로 SH를 보강( node/npm 동시 검증, `~/.npm-global` PATH 정렬, `openclaw` 설치 실패 시 `npx` wrapper fallback, 실패 시 진단 정보 출력, `clawhub` 설치 PATH 통일 )
 
-### 8) WSL PATH 구문 오류로 OpenClaw 설치 실패 (2026-02-22)
-- 버그 종류: `OpenClaw installation failed` 전에 `/home/.../.profile: syntax error near unexpected token '('`가 반복 발생
-- 원인: `export PATH=$HOME/.npm-global/bin:$PATH`를 따옴표 없이 실행/저장하면서, Windows 경로(`Program Files (x86)`)가 포함된 PATH가 Bash 구문 오류를 유발
-- 해결방안: BAT/SH 모두 PATH 처리 로직을 수정해 `export PATH="$HOME/.npm-global/bin:$PATH"`로 통일하고, 실행 전 `.profile`/`.bashrc`의 깨진 PATH 라인을 자동 정리하도록 보강
+## 2026-02-22
+
+### 8) WSL 프로필 구문 오류 연쇄로 OpenClaw 설치 단계 실패
+- 버그 종류: `OpenClaw installation failed` 전후로 `/home/.../.profile: syntax error near unexpected token '('`가 반복 발생
+- 원인: 사용자 환경의 깨진 PATH 라인이 `.profile`에 남아있고, 설치 명령이 프로필을 읽는 셸 경로를 반복 호출해 오류가 연쇄 전파됨
+- 해결방안: BAT/SH의 WSL 호출을 `wsl bash --noprofile --norc`로 통일하고, 실행 초기에 `.profile`/`.bashrc`의 비정상 PATH 라인을 정리하도록 보강
+
+### 9) BAT `%` 확장으로 인한 따옴표 깨짐/EOF 오류
+- 버그 종류: `[2/11] Checking OpenClaw...` 구간에서 `unexpected EOF while looking for matching \`''`가 발생하거나 명령 문자열이 중간에서 손상됨
+- 원인: BAT에서 `%s`를 포함한 `printf '%s...'` 패턴이 환경변수 확장 규칙과 충돌해 명령 본문이 변형됨
+- 해결방안: BAT 생성 로직의 `%` 포함 포맷 문자열을 제거하고, PATH/.env 쓰기를 `%` 없는 `echo` 기반 명령으로 교체해 인용부호 안정성을 확보
