@@ -11,7 +11,7 @@ Telegram에 AI 비서가 인사를 보냅니다.
 
 <br>
 
-[🚀 지금 시작하기](https://deepdivekr.github.io/openclaw-setup/) · [📥 오프라인 HTML 다운로드](https://github.com/deepdivekr/openclaw-setup/raw/main/openclaw-setup.html)
+[🚀 지금 시작하기](https://deepdivekr.github.io/openclaw-setup/openclaw-setup.html) · [📥 오프라인 HTML 다운로드](https://github.com/deepdivekr/openclaw-setup/raw/main/openclaw-setup.html)
 
 ---
 
@@ -89,7 +89,7 @@ OpenClaw 생태계에 5,700개 이상의 스킬이 등록되어 있고 커뮤니
 
 ### 1단계: 웹페이지 접속
 
-[deepdivekr.github.io/openclaw-setup](https://deepdivekr.github.io/openclaw-setup/)을 엽니다 (또는 [오프라인 HTML 다운로드](https://github.com/deepdivekr/openclaw-setup/raw/main/openclaw-setup.html) 후 브라우저에서 더블클릭).
+[deepdivekr.github.io/openclaw-setup/openclaw-setup.html](https://deepdivekr.github.io/openclaw-setup/openclaw-setup.html)을 엽니다 (또는 [오프라인 HTML 다운로드](https://github.com/deepdivekr/openclaw-setup/raw/main/openclaw-setup.html) 후 브라우저에서 더블클릭).
 
 다크 테마의 채팅 인터페이스가 나타납니다.
 
