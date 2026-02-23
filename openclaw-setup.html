@@ -4721,10 +4721,11 @@ OpenClaw ?ㅽ궗 蹂댁븞 ?ㅼ틦?? ?ㅽ궗 ?ㅼ튂 ???낆꽦 ?⑦꽩???먮룞 
         const stepOffset = isCliOAuth ? 1 : 0;
 
         // deltaSkillIds 湲곕컲?쇰줈 ?ㅽ궗 ?ㅼ튂/?몄쬆 怨꾩궛
-        // Security hotfix: external marketplace install disabled
+        // Security hotfix: ClawHub disabled, install via OpenClaw CLI only
         const skillInstalls = deltaSkillIds.length
           ? deltaSkillIds.map((id) =>
-              `echo   [SKIP] ${_escapeBatVar(id)} install disabled (external marketplace disabled)`
+              `echo   Installing ${_escapeBatVar(id)} via openclaw...\n` +
+              `wsl bash --noprofile --norc -lc "openclaw skill install '${_escapeShVar(id)}' --dir ~/.openclaw/skills 2>/dev/null || openclaw skills install '${_escapeShVar(id)}' --dir ~/.openclaw/skills 2>/dev/null || npx openclaw@latest skill install '${_escapeShVar(id)}' --dir ~/.openclaw/skills 2>/dev/null" || echo   [WARN] ${_escapeBatVar(id)} install failed`
             ).join('\n')
           : 'echo   No new skills to install';
 
@@ -5062,9 +5063,9 @@ if errorlevel 1 (
 echo   OpenClaw: OK
 echo.
 ${cliOAuthBatStep}
-:: [${2 + s}/${totalStepsBat}] Install new skills (external marketplace disabled)
+:: [${2 + s}/${totalStepsBat}] Install new skills (ClawHub disabled)
 echo [${2 + s}/${totalStepsBat}] Installing new skills...
-echo   [SKIP] external marketplace install disabled
+echo   Installing via OpenClaw CLI only (ClawHub disabled)
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
@@ -5245,9 +5246,9 @@ wsl bash --noprofile --norc -c "echo 'Security level: %SECURITY_LEVEL%' >> %OPEN
 echo   Skill scanner installed.
 echo.
 
-:: [${6 + stepOffset}/${totalStepsBat}] Install skills (global, external marketplace disabled)
+:: [${6 + stepOffset}/${totalStepsBat}] Install skills (global, ClawHub disabled)
 echo [${6 + stepOffset}/${totalStepsBat}] Installing skills...
-echo   [SKIP] external marketplace install disabled
+echo   Installing via OpenClaw CLI only (ClawHub disabled)
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
@@ -5516,10 +5517,11 @@ if defined _DELETE_SELF (
         const deltaSkillTokensSh = isUpdateSh ? skillTokensSh.filter((s) => !baselineSkillIdsSh.has(s.id)) : skillTokensSh;
 
         // deltaSkillIdsSh 湲곕컲?쇰줈 ?ㅽ궗 ?ㅼ튂/?몄쬆 怨꾩궛
-        // Security hotfix: external marketplace install disabled
+        // Security hotfix: ClawHub disabled, install via OpenClaw CLI only
         const skillInstalls = deltaSkillIdsSh.length
           ? deltaSkillIdsSh.map((id) =>
-              `echo "  [SKIP] ${_escapeShVar(id)} install disabled (external marketplace disabled)"`
+              `echo "  Installing ${_escapeShVar(id)} via openclaw..."\n` +
+              `openclaw skill install '${_escapeShVar(id)}' --dir "$OPENCLAW_HOME/skills" 2>/dev/null || openclaw skills install '${_escapeShVar(id)}' --dir "$OPENCLAW_HOME/skills" 2>/dev/null || npx openclaw@latest skill install '${_escapeShVar(id)}' --dir "$OPENCLAW_HOME/skills" 2>/dev/null || echo "  [WARN] ${_escapeShVar(id)} install failed"`
             ).join('\n')
           : 'echo "  No new skills to install"';
 
@@ -5803,7 +5805,7 @@ ${cliOAuthShStep}
 echo "[${2 + sS}/${totalStepsSh}] Installing new skills..."
 WORKSPACE="$OPENCLAW_HOME/agents/$AGENT_NAME"
 mkdir -p "$WORKSPACE"
-echo "  [SKIP] external marketplace install disabled"
+echo "  Installing via OpenClaw CLI only (ClawHub disabled)"
 ${skillInstalls}
 echo "  Enabling skills in config..."
 ${skillEnableConfigsSh}
@@ -6067,7 +6069,7 @@ echo ""
 
 # ??? [${6 + stepOffsetSh}/${totalStepsSh}] Install skills (global) ???????????
 echo "[${6 + stepOffsetSh}/${totalStepsSh}] Installing skills..."
-echo "  [SKIP] external marketplace install disabled"
+echo "  Installing via OpenClaw CLI only (ClawHub disabled)"
 ${skillInstalls}
 echo "  Enabling skills in config..."
 ${skillEnableConfigsSh}

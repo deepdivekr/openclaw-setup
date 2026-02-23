@@ -64,3 +64,13 @@
 - ?먯씤: `export PATH=$HOME/.npm-global/bin:$PATH; ...` ?ㅽ뻾 ?? ?뺤옣??PATH???ы븿??怨듬갚/愿꾪샇 寃쎈줈媛 紐낅졊 ?뚯떛??源⑤쑉由щ뒗 耳?댁뒪媛 諛쒖깮
 - ?닿껐諛⑹븞: BAT ?앹꽦 紐낅졊???고???PATH export瑜?`export PATH=\"$HOME/.npm-global/bin:$PATH\"; ...` ?뺥깭濡?媛뺤젣 ?몄슜?섏뿬 ?뚯떛 ?ㅻ쪟瑜?李⑤떒
 
+
+## 2026-02-23 (Security Hotfix Addendum)
+
+### 12) Re-enable skill install without ClawHub
+- Kept ClawHub API/CLI paths disabled.
+- Re-enabled skill installation via OpenClaw CLI fallback chain in generated BAT/SH:
+  - `openclaw skill install ...`
+  - `openclaw skills install ...`
+  - `npx openclaw@latest skill install ...`
+- Updated script log messages to state: "ClawHub disabled, using OpenClaw CLI only".
