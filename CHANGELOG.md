@@ -1,57 +1,66 @@
-# CHANGELOG
+﻿# CHANGELOG
 
-이 문서는 온보딩/설치 스크립트의 주요 수정 사항을 기록합니다.
+## 2026-02-23 (Security Hotfix)
+
+### 11) Disable ClawHub integration paths
+- Disabled external marketplace search action path (search_clawhub) in onboarding flow.
+- Removed live ClawHub API call path from setup runtime.
+- Removed ClawHub CLI install/invocation from generated BAT/SH scripts.
+- Skill install steps now explicitly SKIP and continue with built-in skill configuration only.
+
+??臾몄꽌???⑤낫???ㅼ튂 ?ㅽ겕由쏀듃??二쇱슂 ?섏젙 ?ы빆??湲곕줉?⑸땲??
 
 ## 2026-02-21
 
-### 1) 스킬 설치 단계 실패
-- 버그 종류: `Installing skills...`에서 다수 스킬 설치 실패
-- 원인: `openclaw skill install` 기반 가정이 실제 배포 CLI와 불일치
-- 해결방안: `clawhub install` 경로로 전환하고, 설치 후 `openclaw config set "skills.entries.{id}.enabled" true`로 활성화 처리
+### 1) ?ㅽ궗 ?ㅼ튂 ?④퀎 ?ㅽ뙣
+- 踰꾧렇 醫낅쪟: `Installing skills...`?먯꽌 ?ㅼ닔 ?ㅽ궗 ?ㅼ튂 ?ㅽ뙣
+- ?먯씤: `openclaw skill install` 湲곕컲 媛?뺤씠 ?ㅼ젣 諛고룷 CLI? 遺덉씪移?
+- ?닿껐諛⑹븞: `clawhub install` 寃쎈줈濡??꾪솚?섍퀬, ?ㅼ튂 ??`openclaw config set "skills.entries.{id}.enabled" true`濡??쒖꽦??泥섎━
 
-### 2) Node.js / OpenClaw 설치 실패
-- 버그 종류: WSL 환경에서 Node/OpenClaw 설치 단계 중단
-- 원인: `nvm install --lts`/구버전 설치 경로와 환경별 해석 차이, 구버전 `openclaw` 글로벌 설치 경로 사용
-- 해결방안: Node 설치를 `nvm install 22`로 고정하고 OpenClaw 설치를 `npm install -g openclaw@latest`로 통일
+### 2) Node.js / OpenClaw ?ㅼ튂 ?ㅽ뙣
+- 踰꾧렇 醫낅쪟: WSL ?섍꼍?먯꽌 Node/OpenClaw ?ㅼ튂 ?④퀎 以묐떒
+- ?먯씤: `nvm install --lts`/援щ쾭???ㅼ튂 寃쎈줈? ?섍꼍蹂??댁꽍 李⑥씠, 援щ쾭??`openclaw` 湲濡쒕쾶 ?ㅼ튂 寃쎈줈 ?ъ슜
+- ?닿껐諛⑹븞: Node ?ㅼ튂瑜?`nvm install 22`濡?怨좎젙?섍퀬 OpenClaw ?ㅼ튂瑜?`npm install -g openclaw@latest`濡??듭씪
 
-### 3) 크론 등록 실패
-- 버그 종류: 스케줄 등록 후 반복 경고 또는 실제 미등록
-- 원인: 기존 `cron add ... --agent` 포맷이 최신 CLI 스펙과 불일치
-- 해결방안: `openclaw cron add --name --cron --session isolated --message --tz` 형식으로 변경
+### 3) ?щ줎 ?깅줉 ?ㅽ뙣
+- 踰꾧렇 醫낅쪟: ?ㅼ?以??깅줉 ??諛섎났 寃쎄퀬 ?먮뒗 ?ㅼ젣 誘몃벑濡?
+- ?먯씤: 湲곗〈 `cron add ... --agent` ?щ㎎??理쒖떊 CLI ?ㅽ럺怨?遺덉씪移?
+- ?닿껐諛⑹븞: `openclaw cron add --name --cron --session isolated --message --tz` ?뺤떇?쇰줈 蹂寃?
 
-### 4) 에이전트/채널 설정 단계의 오탐 성공 로그
-- 버그 종류: 내부 경고가 있었는데도 최종 `[OK]` 출력
-- 원인: 개별 실패를 로그로만 소비하고 단계 결과에 반영하지 않음
-- 해결방안: `CHANNEL_CONFIG_WARN` 플래그를 도입해 경고 발생 시 `[WARN]` 상태를 출력
+### 4) ?먯씠?꾪듃/梨꾨꼸 ?ㅼ젙 ?④퀎???ㅽ깘 ?깃났 濡쒓렇
+- 踰꾧렇 醫낅쪟: ?대? 寃쎄퀬媛 ?덉뿀?붾뜲??理쒖쥌 `[OK]` 異쒕젰
+- ?먯씤: 媛쒕퀎 ?ㅽ뙣瑜?濡쒓렇濡쒕쭔 ?뚮퉬?섍퀬 ?④퀎 寃곌낵??諛섏쁺?섏? ?딆쓬
+- ?닿껐諛⑹븞: `CHANNEL_CONFIG_WARN` ?뚮옒洹몃? ?꾩엯??寃쎄퀬 諛쒖깮 ??`[WARN]` ?곹깭瑜?異쒕젰
 
-### 5) 멀티 에이전트 텔레그램 토큰 충돌
-- 버그 종류: 신규 에이전트 설치 후 기존 에이전트 대화/크론 알림 경로 꼬임
-- 원인: 채널 토큰을 글로벌 `~/.openclaw/.env`에 저장하여 default account fallback 충돌 발생
-- 해결방안: 채널 토큰의 env 저장을 제거하고, `openclaw channels add --channel <type> --account <agent> --token <token>` + `openclaw.json` account/binding 기반으로 분리
+### 5) 硫???먯씠?꾪듃 ?붾젅洹몃옩 ?좏겙 異⑸룎
+- 踰꾧렇 醫낅쪟: ?좉퇋 ?먯씠?꾪듃 ?ㅼ튂 ??湲곗〈 ?먯씠?꾪듃 ????щ줎 ?뚮┝ 寃쎈줈 瑗ъ엫
+- ?먯씤: 梨꾨꼸 ?좏겙??湲濡쒕쾶 `~/.openclaw/.env`????ν븯??default account fallback 異⑸룎 諛쒖깮
+- ?닿껐諛⑹븞: 梨꾨꼸 ?좏겙??env ??μ쓣 ?쒓굅?섍퀬, `openclaw channels add --channel <type> --account <agent> --token <token>` + `openclaw.json` account/binding 湲곕컲?쇰줈 遺꾨━
 
-### 6) BAT/SH 경로 불일치로 인한 플랫폼별 재발
-- 버그 종류: Windows에서는 해결됐지만 SH 경로에서 동일 문제 재발
-- 원인: BAT와 SH 생성 로직이 비대칭으로 유지됨
-- 해결방안: BAT/SH 모두 동일 정책으로 정렬(스킬 설치, 인증 저장 위치, 크론 등록, 채널 계정 바인딩, 상태 출력)
+### 6) BAT/SH 寃쎈줈 遺덉씪移섎줈 ?명븳 ?뚮옯?쇰퀎 ?щ컻
+- 踰꾧렇 醫낅쪟: Windows?먯꽌???닿껐?먯?留?SH 寃쎈줈?먯꽌 ?숈씪 臾몄젣 ?щ컻
+- ?먯씤: BAT? SH ?앹꽦 濡쒖쭅??鍮꾨?移?쑝濡??좎???
+- ?닿껐諛⑹븞: BAT/SH 紐⑤몢 ?숈씪 ?뺤콉?쇰줈 ?뺣젹(?ㅽ궗 ?ㅼ튂, ?몄쬆 ????꾩튂, ?щ줎 ?깅줉, 梨꾨꼸 怨꾩젙 諛붿씤?? ?곹깭 異쒕젰)
 
-### 7) SH OpenClaw 설치 단계 재발 보강
-- 버그 종류: SH에서 Node.js가 설치되어도 OpenClaw 설치/탐지가 실패해 온보딩이 중단될 수 있음
-- 원인: npm 글로벌 prefix/PATH 편차, 동일 명령 재시도 반복, 실패 시 원인 파악 정보 부족
-- 해결방안: BAT와 동일한 강건성 패턴으로 SH를 보강( node/npm 동시 검증, `~/.npm-global` PATH 정렬, `openclaw` 설치 실패 시 `npx` wrapper fallback, 실패 시 진단 정보 출력, `clawhub` 설치 PATH 통일 )
+### 7) SH OpenClaw ?ㅼ튂 ?④퀎 ?щ컻 蹂닿컯
+- 踰꾧렇 醫낅쪟: SH?먯꽌 Node.js媛 ?ㅼ튂?섏뼱??OpenClaw ?ㅼ튂/?먯?媛 ?ㅽ뙣???⑤낫?⑹씠 以묐떒?????덉쓬
+- ?먯씤: npm 湲濡쒕쾶 prefix/PATH ?몄감, ?숈씪 紐낅졊 ?ъ떆??諛섎났, ?ㅽ뙣 ???먯씤 ?뚯븙 ?뺣낫 遺議?
+- ?닿껐諛⑹븞: BAT? ?숈씪??媛뺢굔???⑦꽩?쇰줈 SH瑜?蹂닿컯( node/npm ?숈떆 寃利? `~/.npm-global` PATH ?뺣젹, `openclaw` ?ㅼ튂 ?ㅽ뙣 ??`npx` wrapper fallback, ?ㅽ뙣 ??吏꾨떒 ?뺣낫 異쒕젰, `clawhub` ?ㅼ튂 PATH ?듭씪 )
 
 ## 2026-02-22
 
-### 8) WSL 프로필 구문 오류 연쇄로 OpenClaw 설치 단계 실패
-- 버그 종류: `OpenClaw installation failed` 전후로 `/home/.../.profile: syntax error near unexpected token '('`가 반복 발생
-- 원인: 사용자 환경의 깨진 PATH 라인이 `.profile`에 남아있고, 설치 명령이 프로필을 읽는 셸 경로를 반복 호출해 오류가 연쇄 전파됨
-- 해결방안: BAT/SH의 WSL 호출을 `wsl bash --noprofile --norc`로 통일하고, 실행 초기에 `.profile`/`.bashrc`의 비정상 PATH 라인을 정리하도록 보강
+### 8) WSL ?꾨줈??援щЦ ?ㅻ쪟 ?곗뇙濡?OpenClaw ?ㅼ튂 ?④퀎 ?ㅽ뙣
+- 踰꾧렇 醫낅쪟: `OpenClaw installation failed` ?꾪썑濡?`/home/.../.profile: syntax error near unexpected token '('`媛 諛섎났 諛쒖깮
+- ?먯씤: ?ъ슜???섍꼍??源⑥쭊 PATH ?쇱씤??`.profile`???⑥븘?덇퀬, ?ㅼ튂 紐낅졊???꾨줈?꾩쓣 ?쎈뒗 ??寃쎈줈瑜?諛섎났 ?몄텧???ㅻ쪟媛 ?곗뇙 ?꾪뙆??
+- ?닿껐諛⑹븞: BAT/SH??WSL ?몄텧??`wsl bash --noprofile --norc`濡??듭씪?섍퀬, ?ㅽ뻾 珥덇린??`.profile`/`.bashrc`??鍮꾩젙??PATH ?쇱씤???뺣━?섎룄濡?蹂닿컯
 
-### 9) BAT `%` 확장으로 인한 따옴표 깨짐/EOF 오류
-- 버그 종류: `[2/11] Checking OpenClaw...` 구간에서 `unexpected EOF while looking for matching \`''`가 발생하거나 명령 문자열이 중간에서 손상됨
-- 원인: BAT에서 `%s`를 포함한 `printf '%s...'` 패턴이 환경변수 확장 규칙과 충돌해 명령 본문이 변형됨
-- 해결방안: BAT 생성 로직의 `%` 포함 포맷 문자열을 제거하고, PATH/.env 쓰기를 `%` 없는 `echo` 기반 명령으로 교체해 인용부호 안정성을 확보
+### 9) BAT `%` ?뺤옣?쇰줈 ?명븳 ?곗샂??源⑥쭚/EOF ?ㅻ쪟
+- 踰꾧렇 醫낅쪟: `[2/11] Checking OpenClaw...` 援ш컙?먯꽌 `unexpected EOF while looking for matching \`''`媛 諛쒖깮?섍굅??紐낅졊 臾몄옄?댁씠 以묎컙?먯꽌 ?먯긽??
+- ?먯씤: BAT?먯꽌 `%s`瑜??ы븿??`printf '%s...'` ?⑦꽩???섍꼍蹂???뺤옣 洹쒖튃怨?異⑸룎??紐낅졊 蹂몃Ц??蹂?뺣맖
+- ?닿껐諛⑹븞: BAT ?앹꽦 濡쒖쭅??`%` ?ы븿 ?щ㎎ 臾몄옄?댁쓣 ?쒓굅?섍퀬, PATH/.env ?곌린瑜?`%` ?녿뒗 `echo` 湲곕컲 紐낅졊?쇰줈 援먯껜???몄슜遺???덉젙?깆쓣 ?뺣낫
 
-### 10) BAT 런타임 PATH export 미인용으로 인한 `Program Files (x86)` 파싱 오류
-- 버그 종류: OpenClaw 설치 명령에서 `syntax error near unexpected token '('`가 반복되어 설치 실패
-- 원인: `export PATH=$HOME/.npm-global/bin:$PATH; ...` 실행 시, 확장된 PATH에 포함된 공백/괄호 경로가 명령 파싱을 깨뜨리는 케이스가 발생
-- 해결방안: BAT 생성 명령의 런타임 PATH export를 `export PATH=\"$HOME/.npm-global/bin:$PATH\"; ...` 형태로 강제 인용하여 파싱 오류를 차단
+### 10) BAT ?고???PATH export 誘몄씤?⑹쑝濡??명븳 `Program Files (x86)` ?뚯떛 ?ㅻ쪟
+- 踰꾧렇 醫낅쪟: OpenClaw ?ㅼ튂 紐낅졊?먯꽌 `syntax error near unexpected token '('`媛 諛섎났?섏뼱 ?ㅼ튂 ?ㅽ뙣
+- ?먯씤: `export PATH=$HOME/.npm-global/bin:$PATH; ...` ?ㅽ뻾 ?? ?뺤옣??PATH???ы븿??怨듬갚/愿꾪샇 寃쎈줈媛 紐낅졊 ?뚯떛??源⑤쑉由щ뒗 耳?댁뒪媛 諛쒖깮
+- ?닿껐諛⑹븞: BAT ?앹꽦 紐낅졊???고???PATH export瑜?`export PATH=\"$HOME/.npm-global/bin:$PATH\"; ...` ?뺥깭濡?媛뺤젣 ?몄슜?섏뿬 ?뚯떛 ?ㅻ쪟瑜?李⑤떒
+
