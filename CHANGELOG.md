@@ -1,76 +1,38 @@
 ﻿# CHANGELOG
 
+OpenClaw Setup 주요 변경 이력을 기록합니다.
+
 ## 2026-02-23 (Security Hotfix)
 
-### 11) Disable ClawHub integration paths
-- Disabled external marketplace search action path (search_clawhub) in onboarding flow.
-- Removed live ClawHub API call path from setup runtime.
-- Removed ClawHub CLI install/invocation from generated BAT/SH scripts.
-- Skill install steps now explicitly SKIP and continue with built-in skill configuration only.
+### 11) ClawHub 연동 경로 비활성화
+- 온보딩 대화의 `search_clawhub` 액션 경로를 비활성화했습니다.
+- 런타임의 ClawHub API 호출 경로를 제거했습니다.
+- 생성되는 BAT/SH에서 ClawHub CLI 설치/호출 경로를 제거했습니다.
 
-??臾몄꽌???⑤낫???ㅼ튂 ?ㅽ겕由쏀듃??二쇱슂 ?섏젙 ?ы빆??湲곕줉?⑸땲??
-
-## 2026-02-21
-
-### 1) ?ㅽ궗 ?ㅼ튂 ?④퀎 ?ㅽ뙣
-- 踰꾧렇 醫낅쪟: `Installing skills...`?먯꽌 ?ㅼ닔 ?ㅽ궗 ?ㅼ튂 ?ㅽ뙣
-- ?먯씤: `openclaw skill install` 湲곕컲 媛?뺤씠 ?ㅼ젣 諛고룷 CLI? 遺덉씪移?
-- ?닿껐諛⑹븞: `clawhub install` 寃쎈줈濡??꾪솚?섍퀬, ?ㅼ튂 ??`openclaw config set "skills.entries.{id}.enabled" true`濡??쒖꽦??泥섎━
-
-### 2) Node.js / OpenClaw ?ㅼ튂 ?ㅽ뙣
-- 踰꾧렇 醫낅쪟: WSL ?섍꼍?먯꽌 Node/OpenClaw ?ㅼ튂 ?④퀎 以묐떒
-- ?먯씤: `nvm install --lts`/援щ쾭???ㅼ튂 寃쎈줈? ?섍꼍蹂??댁꽍 李⑥씠, 援щ쾭??`openclaw` 湲濡쒕쾶 ?ㅼ튂 寃쎈줈 ?ъ슜
-- ?닿껐諛⑹븞: Node ?ㅼ튂瑜?`nvm install 22`濡?怨좎젙?섍퀬 OpenClaw ?ㅼ튂瑜?`npm install -g openclaw@latest`濡??듭씪
-
-### 3) ?щ줎 ?깅줉 ?ㅽ뙣
-- 踰꾧렇 醫낅쪟: ?ㅼ?以??깅줉 ??諛섎났 寃쎄퀬 ?먮뒗 ?ㅼ젣 誘몃벑濡?
-- ?먯씤: 湲곗〈 `cron add ... --agent` ?щ㎎??理쒖떊 CLI ?ㅽ럺怨?遺덉씪移?
-- ?닿껐諛⑹븞: `openclaw cron add --name --cron --session isolated --message --tz` ?뺤떇?쇰줈 蹂寃?
-
-### 4) ?먯씠?꾪듃/梨꾨꼸 ?ㅼ젙 ?④퀎???ㅽ깘 ?깃났 濡쒓렇
-- 踰꾧렇 醫낅쪟: ?대? 寃쎄퀬媛 ?덉뿀?붾뜲??理쒖쥌 `[OK]` 異쒕젰
-- ?먯씤: 媛쒕퀎 ?ㅽ뙣瑜?濡쒓렇濡쒕쭔 ?뚮퉬?섍퀬 ?④퀎 寃곌낵??諛섏쁺?섏? ?딆쓬
-- ?닿껐諛⑹븞: `CHANNEL_CONFIG_WARN` ?뚮옒洹몃? ?꾩엯??寃쎄퀬 諛쒖깮 ??`[WARN]` ?곹깭瑜?異쒕젰
-
-### 5) 硫???먯씠?꾪듃 ?붾젅洹몃옩 ?좏겙 異⑸룎
-- 踰꾧렇 醫낅쪟: ?좉퇋 ?먯씠?꾪듃 ?ㅼ튂 ??湲곗〈 ?먯씠?꾪듃 ????щ줎 ?뚮┝ 寃쎈줈 瑗ъ엫
-- ?먯씤: 梨꾨꼸 ?좏겙??湲濡쒕쾶 `~/.openclaw/.env`????ν븯??default account fallback 異⑸룎 諛쒖깮
-- ?닿껐諛⑹븞: 梨꾨꼸 ?좏겙??env ??μ쓣 ?쒓굅?섍퀬, `openclaw channels add --channel <type> --account <agent> --token <token>` + `openclaw.json` account/binding 湲곕컲?쇰줈 遺꾨━
-
-### 6) BAT/SH 寃쎈줈 遺덉씪移섎줈 ?명븳 ?뚮옯?쇰퀎 ?щ컻
-- 踰꾧렇 醫낅쪟: Windows?먯꽌???닿껐?먯?留?SH 寃쎈줈?먯꽌 ?숈씪 臾몄젣 ?щ컻
-- ?먯씤: BAT? SH ?앹꽦 濡쒖쭅??鍮꾨?移?쑝濡??좎???
-- ?닿껐諛⑹븞: BAT/SH 紐⑤몢 ?숈씪 ?뺤콉?쇰줈 ?뺣젹(?ㅽ궗 ?ㅼ튂, ?몄쬆 ????꾩튂, ?щ줎 ?깅줉, 梨꾨꼸 怨꾩젙 諛붿씤?? ?곹깭 異쒕젰)
-
-### 7) SH OpenClaw ?ㅼ튂 ?④퀎 ?щ컻 蹂닿컯
-- 踰꾧렇 醫낅쪟: SH?먯꽌 Node.js媛 ?ㅼ튂?섏뼱??OpenClaw ?ㅼ튂/?먯?媛 ?ㅽ뙣???⑤낫?⑹씠 以묐떒?????덉쓬
-- ?먯씤: npm 湲濡쒕쾶 prefix/PATH ?몄감, ?숈씪 紐낅졊 ?ъ떆??諛섎났, ?ㅽ뙣 ???먯씤 ?뚯븙 ?뺣낫 遺議?
-- ?닿껐諛⑹븞: BAT? ?숈씪??媛뺢굔???⑦꽩?쇰줈 SH瑜?蹂닿컯( node/npm ?숈떆 寃利? `~/.npm-global` PATH ?뺣젹, `openclaw` ?ㅼ튂 ?ㅽ뙣 ??`npx` wrapper fallback, ?ㅽ뙣 ??吏꾨떒 ?뺣낫 異쒕젰, `clawhub` ?ㅼ튂 PATH ?듭씪 )
-
-## 2026-02-22
-
-### 8) WSL ?꾨줈??援щЦ ?ㅻ쪟 ?곗뇙濡?OpenClaw ?ㅼ튂 ?④퀎 ?ㅽ뙣
-- 踰꾧렇 醫낅쪟: `OpenClaw installation failed` ?꾪썑濡?`/home/.../.profile: syntax error near unexpected token '('`媛 諛섎났 諛쒖깮
-- ?먯씤: ?ъ슜???섍꼍??源⑥쭊 PATH ?쇱씤??`.profile`???⑥븘?덇퀬, ?ㅼ튂 紐낅졊???꾨줈?꾩쓣 ?쎈뒗 ??寃쎈줈瑜?諛섎났 ?몄텧???ㅻ쪟媛 ?곗뇙 ?꾪뙆??
-- ?닿껐諛⑹븞: BAT/SH??WSL ?몄텧??`wsl bash --noprofile --norc`濡??듭씪?섍퀬, ?ㅽ뻾 珥덇린??`.profile`/`.bashrc`??鍮꾩젙??PATH ?쇱씤???뺣━?섎룄濡?蹂닿컯
-
-### 9) BAT `%` ?뺤옣?쇰줈 ?명븳 ?곗샂??源⑥쭚/EOF ?ㅻ쪟
-- 踰꾧렇 醫낅쪟: `[2/11] Checking OpenClaw...` 援ш컙?먯꽌 `unexpected EOF while looking for matching \`''`媛 諛쒖깮?섍굅??紐낅졊 臾몄옄?댁씠 以묎컙?먯꽌 ?먯긽??
-- ?먯씤: BAT?먯꽌 `%s`瑜??ы븿??`printf '%s...'` ?⑦꽩???섍꼍蹂???뺤옣 洹쒖튃怨?異⑸룎??紐낅졊 蹂몃Ц??蹂?뺣맖
-- ?닿껐諛⑹븞: BAT ?앹꽦 濡쒖쭅??`%` ?ы븿 ?щ㎎ 臾몄옄?댁쓣 ?쒓굅?섍퀬, PATH/.env ?곌린瑜?`%` ?녿뒗 `echo` 湲곕컲 紐낅졊?쇰줈 援먯껜???몄슜遺???덉젙?깆쓣 ?뺣낫
-
-### 10) BAT ?고???PATH export 誘몄씤?⑹쑝濡??명븳 `Program Files (x86)` ?뚯떛 ?ㅻ쪟
-- 踰꾧렇 醫낅쪟: OpenClaw ?ㅼ튂 紐낅졊?먯꽌 `syntax error near unexpected token '('`媛 諛섎났?섏뼱 ?ㅼ튂 ?ㅽ뙣
-- ?먯씤: `export PATH=$HOME/.npm-global/bin:$PATH; ...` ?ㅽ뻾 ?? ?뺤옣??PATH???ы븿??怨듬갚/愿꾪샇 寃쎈줈媛 紐낅졊 ?뚯떛??源⑤쑉由щ뒗 耳?댁뒪媛 諛쒖깮
-- ?닿껐諛⑹븞: BAT ?앹꽦 紐낅졊???고???PATH export瑜?`export PATH=\"$HOME/.npm-global/bin:$PATH\"; ...` ?뺥깭濡?媛뺤젣 ?몄슜?섏뿬 ?뚯떛 ?ㅻ쪟瑜?李⑤떒
-
-
-## 2026-02-23 (Security Hotfix Addendum)
-
-### 12) Re-enable skill install without ClawHub
-- Kept ClawHub API/CLI paths disabled.
-- Re-enabled skill installation via OpenClaw CLI fallback chain in generated BAT/SH:
+### 12) ClawHub 없이 스킬 설치 재활성화
+- ClawHub API/CLI는 계속 비활성화 상태를 유지합니다.
+- 대신 생성되는 BAT/SH에서 OpenClaw CLI로 스킬 설치를 다시 활성화했습니다.
+- 설치 fallback 체인:
   - `openclaw skill install ...`
   - `openclaw skills install ...`
   - `npx openclaw@latest skill install ...`
-- Updated script log messages to state: "ClawHub disabled, using OpenClaw CLI only".
+- 스크립트 로그에 `ClawHub disabled, using OpenClaw CLI only` 문구를 명시했습니다.
+
+## 2026-02-22
+
+### WSL/BAT 안정화 보강
+- WSL 실행을 `wsl bash --noprofile --norc` 기준으로 통일해 쉘 초기화 충돌을 줄였습니다.
+- BAT 문자열 확장/인용 문제로 인한 설치 중단 케이스를 완화했습니다.
+- PATH 인용 처리 보강으로 `(x86)` 경로 포함 환경에서의 파싱 오류를 줄였습니다.
+
+## 2026-02-21
+
+### 설치/설정 플로우 보강
+- 스킬 설치 및 활성화 경로를 정비했습니다.
+- Node/OpenClaw 설치 및 재시도/오류 안내 흐름을 보강했습니다.
+- cron 등록 명령 경로를 최신 CLI 규격에 맞게 정리했습니다.
+- 채널 토큰/계정 바인딩 처리 흐름을 개선했습니다.
+
+---
+
+참고: 과거 일부 항목은 인코딩 손상으로 원문 복구가 어려워, 핵심 변경 요약으로 재작성했습니다.
