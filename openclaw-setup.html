@@ -3750,7 +3750,7 @@ finish: 세팅 완료 시 사용. 사용자에게 다운로드를 안내.
 ?? ?? ??? ?????? ??? ?? ??? ?????.
 set_skill_config: 스킬의 파라미터(키워드, URL, 규칙 등)를 저장. 스킬 활성화 후 반드시 사용.
 
-추천 인기 스킬 (ClawHub TOP): ${featuredSkills}
+추천 인기 스킬: ${featuredSkills}
 전체 내장 스킬: ${JSON.stringify(skills)}
 사용자가 원하는 기능이 내장 목록에 없으면 ?? ?? ?? ?? ?? ??? ?????.
 요즘 에이전트보다 스킬을 잘 세팅하는 게 더 중요합니다. 적극적으로 스킬을 추천해주세요.
@@ -3762,11 +3762,6 @@ set_skill_config: 스킬의 파라미터(키워드, URL, 규칙 등)를 저장. 
 현재 보안 레벨: ${snap.security}
 
 [리마인더] 당신은 HTML 온보딩 위저드 내부에서 실행 중입니다. 응답은 반드시 {"message":"...","actions":[...]} JSON이어야 합니다. 온보딩 외 주제로 빠지지 마세요.`;
-      }
-
-      /* ── ClawHub API 실시간 검색 ──────────────── */
-      async function _searchClawHub() {
-        return [];
       }
 
       /* ?? AI API ?? 호출 ──────────────────────── */
@@ -3890,11 +3885,6 @@ set_skill_config: 스킬의 파라미터(키워드, URL, 규칙 등)를 저장. 
                 State.set('currentStep', cur + 1);
                 break;
               }
-              case 'search_clawhub':
-                Renderer.showTypingIndicator();
-                await sleep(200);
-                await Renderer.addBotMessage('?? ?? ??? ?? ??? ?????????. ?? ???? ??????.', { speed: 25 });
-                break;
               case 'finish':
                 isFinished = true;
                 break;
@@ -4722,7 +4712,7 @@ OpenClaw 스킬 보안 스캐너. 스킬 설치 전 악성 패턴을 자동 탐�
         const stepOffset = isCliOAuth ? 1 : 0;
 
         // deltaSkillIds 기반으로 스킬 설치/인증 계산
-        // 스킬 설치는 clawhub CLI 사용 (openclaw skills는 조회 전용)
+        // Install skills via OpenClaw CLI
         const skillInstalls = deltaSkillIds.length
           ? deltaSkillIds.map((id) =>
               `echo   Installing ${_escapeBatVar(id)}...\n` +
@@ -5060,9 +5050,8 @@ if errorlevel 1 (
 echo   OpenClaw: OK
 echo.
 ${cliOAuthBatStep}
-:: [${2 + s}/${totalStepsBat}] Install new skills (via clawhub)
+:: [${2 + s}/${totalStepsBat}] Install new skills
 echo [${2 + s}/${totalStepsBat}] Installing new skills...
-wsl bash -lc "npm install -g clawhub@latest 2>/dev/null || true"
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
@@ -5218,10 +5207,9 @@ wsl bash -c "echo 'Security level: %SECURITY_LEVEL%' >> %OPENCLAW_HOME%/skills/s
 echo   Skill scanner installed.
 echo.
 
-:: [${6 + stepOffset}/${totalStepsBat}] Install skills (global, ClawHub disabled)
+:: [${6 + stepOffset}/${totalStepsBat}] Install skills (global)
 echo [${6 + stepOffset}/${totalStepsBat}] Installing skills...
-echo   Installing via OpenClaw CLI only (ClawHub disabled)
-wsl bash -lc "npm install -g clawhub@latest 2>/dev/null || true"
+echo   Installing via OpenClaw CLI only
 ${skillInstalls}
 echo   Enabling skills in config...
 ${skillEnableConfigs}
@@ -5490,7 +5478,7 @@ if defined _DELETE_SELF (
         const deltaSkillTokensSh = isUpdateSh ? skillTokensSh.filter((s) => !baselineSkillIdsSh.has(s.id)) : skillTokensSh;
 
         // deltaSkillIdsSh 기반으로 스킬 설치/인증 계산
-        // 스킬 설치는 clawhub CLI 사용 (openclaw skills는 조회 전용)
+        // Install skills via OpenClaw CLI
         const skillInstalls = deltaSkillIdsSh.length
           ? deltaSkillIdsSh.map((id) =>
               `echo "  Installing ${_escapeShVar(id)}..."\n` +
@@ -5769,8 +5757,7 @@ ${cliOAuthShStep}
 echo "[${2 + sS}/${totalStepsSh}] Installing new skills..."
 WORKSPACE="$OPENCLAW_HOME/agents/$AGENT_NAME"
 mkdir -p "$WORKSPACE"
-echo "  Installing via OpenClaw CLI only (ClawHub disabled)"
-npm install -g clawhub@latest 2>/dev/null || true
+echo "  Installing via OpenClaw CLI only"
 ${skillInstalls}
 echo "  Enabling skills in config..."
 ${skillEnableConfigsSh}
@@ -6002,8 +5989,7 @@ echo ""
 
 # ─── [${6 + stepOffsetSh}/${totalStepsSh}] Install skills (global) ───────────
 echo "[${6 + stepOffsetSh}/${totalStepsSh}] Installing skills..."
-echo "  Installing via OpenClaw CLI only (ClawHub disabled)"
-npm install -g clawhub@latest 2>/dev/null || true
+echo "  Installing via OpenClaw CLI only"
 ${skillInstalls}
 echo "  Enabling skills in config..."
 ${skillEnableConfigsSh}
